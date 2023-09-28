@@ -27,19 +27,27 @@ public class App extends PApplet {
 
     public String configPath;
 
-    // initialise
-    public char[][] layout = new char[20][20];
-
     public Random random = new Random();
+
 	
+    // initialise the layout content
+    private char[][] layout = new char[20][20];
+
+    // initialise all image resources for mapping
+    private HashMap<String,PImage> mapElement = new HashMap<String , PImage>();
+
+    // stores waves objects
+    private ArrayList<Wave> wavesList = new ArrayList<>();
+
+    private Wave currentWave;
+    private int currentWaveNumber = 0;
+    private int totalWaveNumber;
+    private boolean started = true; // the game will immediately start
+
+
     public App() {
         this.configPath = "config.json";
     }
-
-    // map layout content
-    List<String> layoutContent = new ArrayList<>();
-
-    private HashMap<String,PImage> MAP_ELEMENT = new HashMap<String , PImage>();
 
     /**
      * Initialise the setting of the window size.
@@ -59,12 +67,50 @@ public class App extends PApplet {
         // set frame rate
         frameRate(FPS);
 
-        // get json file info
         JSONObject json = loadJSONObject(configPath);
-        String layoutFile = json.getString("layout");
 
-        // extract content from the layout file
-        // store as a 2d array 
+        // retrieve json file info
+        String layoutFile = json.getString("layout");
+        // retrieve the waves array
+        // get infomation for each wave and store in an array "waves"
+        JSONArray wavesContents = json.getJSONArray("waves");
+        for (int i = 0; i < wavesContents.size(); i++) {
+
+            // get each wave
+            JSONObject waveEach = wavesContents.getJSONObject(i);
+            totalWaveNumber = wavesContents.size();
+
+            int waveNumber = i + 1;
+            double duration = waveEach.getDouble("duration");
+            double preWavePause = waveEach.getDouble("pre_wave_pause");
+
+            // // access and iterate over monsters within the wave
+            // JSONArray monsters = waveEach.getJSONArray("monsters");
+            // for (int j = 0; j < monsters.size(); j++) {
+            //     JSONObject monster = monsters.getJSONObject(j);
+
+            //     // Access monster properties
+            //     String type = monster.getString("type");
+            //     int hp = monster.getInt("hp");
+            //     float speed = monster.getFloat("speed");
+            //     float armour = monster.getFloat("armour");
+            //     int manaGainedOnKill = monster.getInt("mana_gained_on_kill");
+            //     int quantity = monster.getInt("quantity");
+
+            //     println("  Monster " + (j + 1) + ":");
+            //     println("  Type: " + type);
+            //     println("  HP: " + hp);
+            //     println("  Speed: " + speed);
+            //     println("  Armour: " + armour);
+            //     println("  Mana gained on kill: " + manaGainedOnKill);
+            //     println("  Quantity: " + quantity);
+            // }
+
+            Wave waveObj = new Wave(waveNumber, duration, preWavePause);
+            wavesList.add(waveObj);
+        }
+
+        // extract content from the layout file (mapping layout)
         String[] layoutTemp = loadStrings(layoutFile);
         for (int i = 0; i < layoutTemp.length; i++) {
             String row = layoutTemp[i];
@@ -74,20 +120,20 @@ public class App extends PApplet {
         }
 
         // load images
-        MAP_ELEMENT.put("GRASS", loadImage("src/main/resources/WizardTD/grass.png"));
-        MAP_ELEMENT.put("PATH_HORIZONTAL", loadImage("src/main/resources/WizardTD/path0.png"));
-        MAP_ELEMENT.put("PATH_VERTICAL", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path0.png"), 90));
-        MAP_ELEMENT.put("PATH_TURN_RU", loadImage("src/main/resources/WizardTD/path1.png"));
-        MAP_ELEMENT.put("PATH_TURN_RD", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path1.png"), 90));
-        MAP_ELEMENT.put("PATH_TURN_LD", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path1.png"), 180));
-        MAP_ELEMENT.put("PATH_TURN_LU", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path1.png"), 270));
-        MAP_ELEMENT.put("PATH_T_DOWN", loadImage("src/main/resources/WizardTD/path2.png"));
-        MAP_ELEMENT.put("PATH_T_LEFT", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path2.png"), 90));
-        MAP_ELEMENT.put("PATH_T_UP", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path2.png"), 180));
-        MAP_ELEMENT.put("PATH_T_RIGHT", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path2.png"), 270));
-        MAP_ELEMENT.put("PATH_CROSS", loadImage("src/main/resources/WizardTD/path3.png"));
-        MAP_ELEMENT.put("SHRUB", loadImage("src/main/resources/WizardTD/shrub.png"));
-        MAP_ELEMENT.put("WIZARD_HOUSE", loadImage("src/main/resources/WizardTD/wizard_house.png"));
+        mapElement.put("GRASS", loadImage("src/main/resources/WizardTD/grass.png"));
+        mapElement.put("PATH_HORIZONTAL", loadImage("src/main/resources/WizardTD/path0.png"));
+        mapElement.put("PATH_VERTICAL", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path0.png"), 90));
+        mapElement.put("PATH_TURN_RU", loadImage("src/main/resources/WizardTD/path1.png"));
+        mapElement.put("PATH_TURN_RD", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path1.png"), 90));
+        mapElement.put("PATH_TURN_LD", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path1.png"), 180));
+        mapElement.put("PATH_TURN_LU", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path1.png"), 270));
+        mapElement.put("PATH_T_DOWN", loadImage("src/main/resources/WizardTD/path2.png"));
+        mapElement.put("PATH_T_LEFT", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path2.png"), 90));
+        mapElement.put("PATH_T_UP", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path2.png"), 180));
+        mapElement.put("PATH_T_RIGHT", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path2.png"), 270));
+        mapElement.put("PATH_CROSS", loadImage("src/main/resources/WizardTD/path3.png"));
+        mapElement.put("SHRUB", loadImage("src/main/resources/WizardTD/shrub.png"));
+        mapElement.put("WIZARD_HOUSE", loadImage("src/main/resources/WizardTD/wizard_house.png"));
     }
 
     /**
@@ -123,12 +169,32 @@ public class App extends PApplet {
      */
 	@Override
     public void draw() {
-        drapMap();    
+
+        // the status background
+        noStroke();
+        fill(137,115,76);
+        rect(0, 0, 760, 40);
+        // the menu background
+        noStroke();
+        fill(137,115,76);
+        rect(640, 40, 680, 680);
+        
+        drawMap();
+        drawTimer();
+        drawManaStatus();
+        drawMenuBar();
+
     }
 
-    private void drapMap() {
+    /**
+     * Method is called in the draw() function
+     * The map of the gameboard is drawn here
+     */
+    private void drawMap() {
+
         int wizard_house_x = 0, wizard_house_y = 0;
 
+        // y and x here correspond with the x and y coordinate
         for (int y = 0; y < layout.length; y += 1) {
             for (int x = 0; x < layout[y].length; x += 1) {
                 // every tile is 32*32
@@ -137,13 +203,13 @@ public class App extends PApplet {
                 int pixel_y = y * 32 + 40;
 
                 if (layout[y][x] == ' ') {
-                    image(MAP_ELEMENT.get("GRASS"), pixel_x, pixel_y);
+                    image(mapElement.get("GRASS"), pixel_x, pixel_y);
                 }
                 else if (layout[y][x] == 'S') {
-                    image(MAP_ELEMENT.get("SHRUB"), pixel_x, pixel_y);
+                    image(mapElement.get("SHRUB"), pixel_x, pixel_y);
                 }
                 else if (layout[y][x] == 'W') {
-                    image(MAP_ELEMENT.get("GRASS"), pixel_x, pixel_y);
+                    image(mapElement.get("GRASS"), pixel_x, pixel_y);
                     // store the position of wizard house
                     wizard_house_x = pixel_x;
                     wizard_house_y = pixel_y;
@@ -166,43 +232,87 @@ public class App extends PApplet {
                     }
 
                     if (up == 'X' && down == 'X' && left == 'X' && right == 'X') {
-                        image(MAP_ELEMENT.get("PATH_CROSS"), pixel_x, pixel_y);
+                        image(mapElement.get("PATH_CROSS"), pixel_x, pixel_y);
                     }
                     else if (up == 'X' && down == 'X' && left == 'X') {
-                        image(MAP_ELEMENT.get("PATH_T_LEFT"), pixel_x, pixel_y);
+                        image(mapElement.get("PATH_T_LEFT"), pixel_x, pixel_y);
                     }
                     else if (up == 'X' && down == 'X' && right == 'X') {
-                        image(MAP_ELEMENT.get("PATH_T_RIGHT"), pixel_x, pixel_y);
+                        image(mapElement.get("PATH_T_RIGHT"), pixel_x, pixel_y);
                     }
                     else if (up == 'X' && left == 'X' && right == 'X') {
-                        image(MAP_ELEMENT.get("PATH_T_UP"), pixel_x, pixel_y);
+                        image(mapElement.get("PATH_T_UP"), pixel_x, pixel_y);
                     }
                     else if (down == 'X' && left == 'X' && right == 'X') {
-                        image(MAP_ELEMENT.get("PATH_T_DOWN"), pixel_x, pixel_y);
+                        image(mapElement.get("PATH_T_DOWN"), pixel_x, pixel_y);
                     }
                     else if (up == 'X' && left == 'X') {
-                        image(MAP_ELEMENT.get("PATH_TURN_RD"), pixel_x, pixel_y);
+                        image(mapElement.get("PATH_TURN_RD"), pixel_x, pixel_y);
                     }
                     else if (down == 'X' && left == 'X') {
-                        image(MAP_ELEMENT.get("PATH_TURN_RU"), pixel_x, pixel_y);
+                        image(mapElement.get("PATH_TURN_RU"), pixel_x, pixel_y);
                     }
                     else if (up == 'X' && right == 'X') {
-                        image(MAP_ELEMENT.get("PATH_TURN_LD"), pixel_x, pixel_y);
+                        image(mapElement.get("PATH_TURN_LD"), pixel_x, pixel_y);
                     }
                     else if (down == 'X' && right == 'X') {
-                        image(MAP_ELEMENT.get("PATH_TURN_LU"), pixel_x, pixel_y);
+                        image(mapElement.get("PATH_TURN_LU"), pixel_x, pixel_y);
                     }
                     else if (up == 'X' || down == 'X') {
-                        image(MAP_ELEMENT.get("PATH_VERTICAL"), pixel_x, pixel_y);
+                        image(mapElement.get("PATH_VERTICAL"), pixel_x, pixel_y);
                     }
                     else if (left == 'X' || right == 'X') {
-                        image(MAP_ELEMENT.get("PATH_HORIZONTAL"), pixel_x, pixel_y);
+                        image(mapElement.get("PATH_HORIZONTAL"), pixel_x, pixel_y);
                     }
                 }
             }
         }
         // load the wizard house at the end
-        image(MAP_ELEMENT.get("WIZARD_HOUSE"), wizard_house_x, wizard_house_y - 8);
+        image(mapElement.get("WIZARD_HOUSE"), wizard_house_x, wizard_house_y - 8);
+    }
+
+    /**
+     * Method is called in the draw() function
+     * The wave status and timer of the gameboard is drawn here
+     */
+    private void drawTimer() {
+
+        if(currentWaveNumber < totalWaveNumber) {
+            currentWave = wavesList.get(currentWaveNumber);
+
+            if (started) {
+                if (currentWave.hasFinishedSpawning()) {
+                    started = false;
+                    currentWaveNumber += 1;
+                } else {
+                    currentWave.setRemainingTime(currentWave.getRemainingTime() - (1.0 / frameRate));
+                }
+            } else {
+                if (currentWave.hasFinishedPausing()) {
+                    started = true;
+                } else {
+                    currentWave.setRemainingPause(currentWave.getRemainingPause() - (1.0 / frameRate));
+                }
+            }
+
+        }
+
+        textSize(20);
+        fill(0, 0, 0);
+        text("Wave " + currentWave.getWaveNumber() + " starts: " + (int)currentWave.getRemainingPause() , 15, 30);
+    }
+
+    private void drawManaStatus() {
+
+    }
+
+
+    /**
+     * Method is called in the draw() function
+     * The selection menu of the gameboard is drawn here
+     */
+    private void drawMenuBar() {
+
     }
 
     public static void main(String[] args) {
