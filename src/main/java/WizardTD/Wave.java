@@ -3,10 +3,13 @@ package WizardTD;
 public class Wave {
 
 	private int waveNumber;
-
 	private double duration;
 	private double preWavePause;
+	// private List<Monster> monsterList;
 
+	private boolean started;
+
+	// these attributes are used for countdown timers
 	private double remainingTime;
 	private double remainingPause;
 	
@@ -15,8 +18,13 @@ public class Wave {
 		this.duration = duration;
 		this.preWavePause = preWavePause;
 
-		this.remainingTime = duration;
-		this.remainingPause = preWavePause;
+		if (waveNumber == 1) {
+			started = true; // the wave 1 will immediately start
+		} else {
+			started = false;
+		}
+		remainingTime = duration;
+		remainingPause = preWavePause;
 	}
 
 	public int getWaveNumber() {
@@ -39,12 +47,20 @@ public class Wave {
 		return remainingPause;
 	}
 
+	public void setStarted(boolean started) {
+		this.started = started;
+	}
+
 	public void setRemainingTime(double time) {
 		this.remainingTime = time;
 	}
 
 	public void setRemainingPause(double pause) {
 		this.remainingPause = pause;
+	}
+
+	public boolean hasStarted() {
+		return started;
 	}
 
 	public boolean hasFinishedSpawning() {
