@@ -35,6 +35,9 @@ public class App extends PApplet {
     // initialise all image resources for mapping
     private HashMap<String, PImage> mapElement = new HashMap<String , PImage>();
     private HashMap<String, Button> buttonElement = new HashMap<String, Button>();
+    private HashMap<String, PImage> monsterElement = new HashMap<String, PImage>();
+    private HashMap<String, List<PImage>> monsterDeathElement = new HashMap<String, List<PImage>>();
+
 
     // stores waves objects
     private List<Wave> wavesList = new ArrayList<>();
@@ -63,9 +66,53 @@ public class App extends PApplet {
         // set frame rate
         frameRate(FPS);
 
-        JSONObject configFile = loadJSONObject(configPath);
+        // load images
+        mapElement.put("GRASS", loadImage("src/main/resources/WizardTD/grass.png"));
+        mapElement.put("PATH_HORIZONTAL", loadImage("src/main/resources/WizardTD/path0.png"));
+        mapElement.put("PATH_VERTICAL", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path0.png"), 90));
+        mapElement.put("PATH_TURN_RU", loadImage("src/main/resources/WizardTD/path1.png"));
+        mapElement.put("PATH_TURN_RD", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path1.png"), 90));
+        mapElement.put("PATH_TURN_LD", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path1.png"), 180));
+        mapElement.put("PATH_TURN_LU", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path1.png"), 270));
+        mapElement.put("PATH_T_DOWN", loadImage("src/main/resources/WizardTD/path2.png"));
+        mapElement.put("PATH_T_LEFT", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path2.png"), 90));
+        mapElement.put("PATH_T_UP", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path2.png"), 180));
+        mapElement.put("PATH_T_RIGHT", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path2.png"), 270));
+        mapElement.put("PATH_CROSS", loadImage("src/main/resources/WizardTD/path3.png"));
+        mapElement.put("SHRUB", loadImage("src/main/resources/WizardTD/shrub.png"));
+        mapElement.put("WIZARD_HOUSE", loadImage("src/main/resources/WizardTD/wizard_house.png"));
 
-        // retrieve config file info
+        buttonElement.put("FF", new Button("FF", "2x speed", 'f', 645, 63));
+        buttonElement.put("P", new Button("P", "PAUSE", 'p', 645, 123));
+        buttonElement.put("T", new Button("T", "Build\ntower", 't', 645, 183));
+        buttonElement.put("U1", new Button("U1", "Upgrade\nrange", '1', 645, 243));
+        buttonElement.put("U2", new Button("U2", "Upgrade\nspeed", '2', 645, 303));
+        buttonElement.put("U3", new Button("U3", "Upgrade\ndamage", '3', 645, 363));
+        buttonElement.put("M", new Button("M", "Mana pool\ncost:", 'm', 645, 423));
+
+        monsterElement.put("gremlin", loadImage("src/main/resources/WizardTD/gremlin.png"));
+        monsterElement.put("beetle", loadImage("src/main/resources/WizardTD/beetle.png"));
+        monsterElement.put("worm", loadImage("src/main/resources/WizardTD/worm.png"));
+
+        monsterDeathElement.put("gremlin", Arrays.asList(
+            loadImage("src/main/resources/WizardTD/gremlin1.png"),
+            loadImage("src/main/resources/WizardTD/gremlin2.png"),
+            loadImage("src/main/resources/WizardTD/gremlin3.png"),
+            loadImage("src/main/resources/WizardTD/gremlin4.png"),
+            loadImage("src/main/resources/WizardTD/gremlin5.png")
+        ));
+
+        monsterDeathElement.put("beetle", Arrays.asList(
+            loadImage("src/main/resources/WizardTD/beetle.png")
+        ));
+
+        monsterDeathElement.put("worm", Arrays.asList(
+            loadImage("src/main/resources/WizardTD/worm.png")
+        ));
+
+
+
+        JSONObject configFile = loadJSONObject(configPath);
 
         // retrieve the waves array
         // get infomation for each wave and store in an array "waves"
@@ -79,29 +126,26 @@ public class App extends PApplet {
             double duration = waveEach.getDouble("duration");
             double preWavePause = waveEach.getDouble("pre_wave_pause");
 
-            // // access and iterate over monsters within the wave
-            // JSONArray monsters = waveEach.getJSONArray("monsters");
-            // for (int j = 0; j < monsters.size(); j++) {
-            //     JSONObject monster = monsters.getJSONObject(j);
+            // access and iterate over monsters within the wave
+            JSONArray monsters = waveEach.getJSONArray("monsters");
+            List<Monster> monsterList = new ArrayList();
 
-            //     // Access monster properties
-            //     String type = monster.getString("type");
-            //     int hp = monster.getInt("hp");
-            //     float speed = monster.getFloat("speed");
-            //     float armour = monster.getFloat("armour");
-            //     int manaGainedOnKill = monster.getInt("mana_gained_on_kill");
-            //     int quantity = monster.getInt("quantity");
+            for (int j = 0; j < monsters.size(); j++) {
+                JSONObject monsterInfo = monsters.getJSONObject(j);
 
-            //     println("  Monster " + (j + 1) + ":");
-            //     println("  Type: " + type);
-            //     println("  HP: " + hp);
-            //     println("  Speed: " + speed);
-            //     println("  Armour: " + armour);
-            //     println("  Mana gained on kill: " + manaGainedOnKill);
-            //     println("  Quantity: " + quantity);
-            // }
+                // Access monster properties
+                String type = monsterInfo.getString("type");
+                int hp = monsterInfo.getInt("hp");
+                float speed = monsterInfo.getFloat("speed");
+                float armour = monsterInfo.getFloat("armour");
+                int manaGainedOnKill = monsterInfo.getInt("mana_gained_on_kill");
+                int quantity = monsterInfo.getInt("quantity");
 
-            Wave waveObj = new Wave(waveNumber, duration, preWavePause);
+                Monster monster = new Monster(type, monsterElement.get(type), monsterDeathElement.get(type), hp, speed, armour, manaGainedOnKill);
+                monsterList.add(monster);
+            }
+
+            Wave waveObj = new Wave(waveNumber, duration, preWavePause, monsterList, monsterList.size());
             wavesList.add(waveObj);
         }
 
@@ -133,32 +177,6 @@ public class App extends PApplet {
         double manaPoolSpellManaGainedMultiplier = configFile.getDouble("mana_pool_spell_mana_gained_multiplier");
 
         Mana mana = new Mana(initialMana, initialManaCap, initialManaGainedPerSecond, manaPoolSpellInitialCost, manaPoolSpellCostIncreasePerUse, manaPoolSpellCapMultiplier, manaPoolSpellManaGainedMultiplier);
-
-
-        // load images
-        mapElement.put("GRASS", loadImage("src/main/resources/WizardTD/grass.png"));
-        mapElement.put("PATH_HORIZONTAL", loadImage("src/main/resources/WizardTD/path0.png"));
-        mapElement.put("PATH_VERTICAL", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path0.png"), 90));
-        mapElement.put("PATH_TURN_RU", loadImage("src/main/resources/WizardTD/path1.png"));
-        mapElement.put("PATH_TURN_RD", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path1.png"), 90));
-        mapElement.put("PATH_TURN_LD", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path1.png"), 180));
-        mapElement.put("PATH_TURN_LU", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path1.png"), 270));
-        mapElement.put("PATH_T_DOWN", loadImage("src/main/resources/WizardTD/path2.png"));
-        mapElement.put("PATH_T_LEFT", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path2.png"), 90));
-        mapElement.put("PATH_T_UP", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path2.png"), 180));
-        mapElement.put("PATH_T_RIGHT", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path2.png"), 270));
-        mapElement.put("PATH_CROSS", loadImage("src/main/resources/WizardTD/path3.png"));
-        mapElement.put("SHRUB", loadImage("src/main/resources/WizardTD/shrub.png"));
-        mapElement.put("WIZARD_HOUSE", loadImage("src/main/resources/WizardTD/wizard_house.png"));
-
-        // Button ff = new Button("FF", "2x speed", 645, 63);
-        buttonElement.put("FF", new Button("FF", "2x speed", 'f', 645, 63));
-        buttonElement.put("P", new Button("P", "PAUSE", 'p', 645, 123));
-        buttonElement.put("T", new Button("T", "Build\ntower", 't', 645, 183));
-        buttonElement.put("U1", new Button("U1", "Upgrade\nrange", '1', 645, 243));
-        buttonElement.put("U2", new Button("U2", "Upgrade\nspeed", '2', 645, 303));
-        buttonElement.put("U3", new Button("U3", "Upgrade\ndamage", '3', 645, 363));
-        buttonElement.put("M", new Button("M", "Mana pool\ncost:", 'm', 645, 423));
 
         gameInterface = new GameInterface(this, layout, mapElement, wavesList, mana, buttonElement);
 

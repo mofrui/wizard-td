@@ -1,11 +1,27 @@
 package WizardTD;
 
+import processing.core.PApplet;
+import processing.core.PImage;
+import processing.data.JSONArray;
+import processing.data.JSONObject;
+import processing.event.MouseEvent;
+
+import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
+
+import java.io.*;
+import java.util.*;
+
+
 public class Wave {
 
 	private int waveNumber;
 	private double duration;
 	private double preWavePause;
-	// private List<Monster> monsterList;
+
+	private List<Monster> monsterList;
+	private int monsterQuantity;
 
 	private boolean started;
 
@@ -13,10 +29,14 @@ public class Wave {
 	private double remainingTime;
 	private double remainingPause;
 	
-	public Wave(int waveNumber, double duration, double preWavePause) {
+	public Wave(int waveNumber, double duration, double preWavePause, List<Monster> monsterList, int monsterQuantity) {
+		
 		this.waveNumber = waveNumber;
 		this.duration = duration;
 		this.preWavePause = preWavePause;
+
+		this.monsterList = monsterList;
+		this.monsterQuantity = monsterQuantity;
 
 		if (waveNumber == 1) {
 			started = true; // the wave 1 will immediately start
@@ -46,6 +66,10 @@ public class Wave {
 	public double getRemainingPause() {
 		return remainingPause;
 	}
+
+	public int getMonsterQuantity() {
+        return monsterQuantity;
+    }
 
 	public void setStarted(boolean started) {
 		this.started = started;
