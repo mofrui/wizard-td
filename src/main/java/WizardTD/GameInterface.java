@@ -22,6 +22,7 @@ public class GameInterface {
 
 	private char[][] layout;
 	private HashMap<String,PImage> mapElement;
+    private int wizard_house_x, wizard_house_y;
 
 	private List<Wave> wavesList;
 	private Wave currentWave;
@@ -29,29 +30,33 @@ public class GameInterface {
     private int currentWaveNumber;
     private int totalWaveNumber;
 
+    private Mana mana; 
+
 	private HashMap<String, Button> buttonElement;
 
 
-
-    // this method help to check whether the mouse is on the button or not
-    public boolean checkMousePosition(int x, int y, int width, int height) {
-        return app.mouseX >= x && app.mouseX <= x + width && app.mouseY >= y && app.mouseY <= y + height;
-    }
-
-
-
-	public GameInterface(PApplet app, char[][] layout, HashMap<String,PImage> mapElement, List<Wave> wavesList, HashMap<String, Button> buttonElement) {
+	public GameInterface(PApplet app, char[][] layout, HashMap<String,PImage> mapElement, List<Wave> wavesList, Mana mana, HashMap<String, Button> buttonElement) {
 		this.app = app;
 
 		this.layout = layout;
 		this.mapElement = mapElement;
+        wizard_house_x = 0;
+        wizard_house_y = 0;
 
 		this.wavesList = wavesList;
 		currentWaveNumber = 0;
 		totalWaveNumber = wavesList.size();
 
+        this.mana = mana;
+
 		this.buttonElement = buttonElement;
 	}
+
+
+    // this method help to check whether the mouse is on a specific area or not
+    public boolean checkMousePosition(int x, int y, int width, int height) {
+        return app.mouseX >= x && app.mouseX <= x + width && app.mouseY >= y && app.mouseY <= y + height;
+    }
 
 
 	public void drawBackground() {
@@ -67,7 +72,6 @@ public class GameInterface {
 
 
 	public void drawMap() {
-		int wizard_house_x = 0, wizard_house_y = 0;
 
         // y and x here correspond with the x and y coordinate
         for (int y = 0; y < layout.length; y += 1) {
@@ -165,25 +169,25 @@ public class GameInterface {
         }
 
 
-        if (!buttonElement.get("P").hasClicked()) { // if the game is not paused
+        if (!buttonElement.get("P").isOn()) { // if the game is not paused
 	        if (currentWave.hasStarted()) {
 				if (currentWave.hasFinishedSpawning()) {
 	                currentWave.setStarted(false);
 	            } else {
-	            	if (buttonElement.get("FF").hasClicked()) {
-	            		currentWave.setRemainingTime(currentWave.getRemainingTime() - (2.0 / frameRate));
+	            	if (buttonElement.get("FF").isOn()) {
+	            		currentWave.updateRemainingTime(currentWave.getRemainingTime() - (2.0 / frameRate));
 	            	} else {
-	            		currentWave.setRemainingTime(currentWave.getRemainingTime() - (1.0 / frameRate));
+	            		currentWave.updateRemainingTime(currentWave.getRemainingTime() - (1.0 / frameRate));
 	            	}
 	            }
 			} else if (nextWave != null) {
 				if (nextWave.hasFinishedPausing()) {
 					nextWave.setStarted(true);
 				} else {
-					if (buttonElement.get("FF").hasClicked()) {
-	            		nextWave.setRemainingPause(nextWave.getRemainingPause() - (2.0 / frameRate));
+					if (buttonElement.get("FF").isOn()) {
+	            		nextWave.updateRemainingPause(nextWave.getRemainingPause() - (2.0 / frameRate));
 	            	} else {
-	            		nextWave.setRemainingPause(nextWave.getRemainingPause() - (1.0 / frameRate));
+	            		nextWave.updateRemainingPause(nextWave.getRemainingPause() - (1.0 / frameRate));
 	            	}
 				}
 			}
@@ -200,6 +204,36 @@ public class GameInterface {
 
     public void drawMana() {
 
+        app.textSize(20);
+        app.fill(0, 0, 0);
+        app.text("MANA:", 345, 30);
+        app.fill(255, 255, 255);
+        app.rect(420, 10, 300, 20);
+
+        app.fill(100, 149, 237);
+        if (!buttonElement.get("P").isOn()) { // if the game is not paused
+            if (buttonElement.get("FF").isOn()) {
+                mana.increaseCurrentManaByTime((2.0 / frameRate));
+            } else {
+                mana.increaseCurrentManaByTime((1.0 / frameRate));
+            }
+        }
+        app.rect(420, 10, mana.getManaPercentage(), 20);
+
+        app.textSize(20);
+        app.fill(0, 0, 0);
+        app.text(mana.getCurrentMana() + "/" + mana.getManaCap(), 520, 27);
+
+        if (buttonElement.get("M").isOn()) {
+            mana.upgradeMana();
+            buttonElement.get("M").updateStatus(); // switch the button off immediately
+        }
+
+        // display upgrade cost
+        app.textSize(12);
+        app.fill(10, 0, 0);
+        app.text(mana.getManaPoolSpellCost(), 728, 463);
+
     }
 
 
@@ -209,11 +243,11 @@ public class GameInterface {
     		Button button = entry.getValue();
     		
     		// set whether the mouse is over the button
-    		button.setOver(checkMousePosition(button.getX(), button.getY(), 50, 50));
+    		button.updateMouseOver(checkMousePosition(button.getX(), button.getY(), 50, 50));
     	
-	    	if (button.hasClicked()) {
+	    	if (button.isOn()) {
 				app.fill(255, 227, 132);
-			} else if (button.hasOver()) {
+			} else if (button.hasMouseOver()) {
 				app.fill(128,128,128);
 			} else {
 				app.noFill();
@@ -228,7 +262,7 @@ public class GameInterface {
 
 	        app.fill(10, 0, 0);
 	        app.textSize(12);
-	        app.text(button.getDesciption(), 700, button.getY() + 20);
+	        app.text(button.getDesciption(), 698, button.getY() + 20);
     	}
 
     }

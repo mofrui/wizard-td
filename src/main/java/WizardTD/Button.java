@@ -1,39 +1,27 @@
 package WizardTD;
 
-import processing.core.PApplet;
-import processing.core.PImage;
-import processing.data.JSONArray;
-import processing.data.JSONObject;
-import processing.event.MouseEvent;
-
-import java.awt.Graphics2D;
-import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
-
-import java.io.*;
-import java.util.*;
-
-
 public class Button {
 
 	private String name;
 	private String description;
+	private char hotKey;
 
-	private boolean over;
-	private boolean clicked;
+	private boolean mouseOver;
+	private boolean status;
 
 	private int x;
 	private int y;
 
-	public Button(String name, String description, int x, int y) {
+	public Button(String name, String description, char hotKey, int x, int y) {
 
 		this.name = name;
 		this.description = description;
+		this.hotKey = hotKey;
 		this.x = x;
 		this.y = y;
 
-		over = false;
-		clicked = false;
+		mouseOver = false;
+		status = false;
 	}
 
 	public String getName() {
@@ -44,6 +32,10 @@ public class Button {
 		return description;
 	}
 
+	public char getHotKey() {
+		return hotKey;
+	}
+
 	public int getX() {
 		return x;
 	}
@@ -52,21 +44,21 @@ public class Button {
 		return y;
 	}
 
-    public void setOver(boolean over) {
-    	this.over = over;
+    public void updateMouseOver(boolean mouseOver) {
+    	this.mouseOver = mouseOver;
     }
 
-    public void setClicked() {
-    	clicked = !clicked;
+    public void updateStatus() {
+    	status = !status;
     }
 
 
-    public boolean hasOver() {
-    	return over;
+    public boolean hasMouseOver() {
+    	return mouseOver;
     }
 
-    public boolean hasClicked() {
-    	return clicked;
+    public boolean isOn() {
+    	return status;
     }
 
 }

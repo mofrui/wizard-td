@@ -51,11 +51,11 @@ public class Wave {
 		this.started = started;
 	}
 
-	public void setRemainingTime(double time) {
+	public void updateRemainingTime(double time) {
 		this.remainingTime = time;
 	}
 
-	public void setRemainingPause(double pause) {
+	public void updateRemainingPause(double pause) {
 		this.remainingPause = pause;
 	}
 

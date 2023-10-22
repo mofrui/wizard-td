@@ -39,9 +39,6 @@ public class App extends PApplet {
     // stores waves objects
     private List<Wave> wavesList = new ArrayList<>();
 
-    // status of the menu bar buttons
-    private boolean FF, P, T, U1, U2, U3, M;
-
     private GameInterface gameInterface;
 
     public App() {
@@ -106,8 +103,6 @@ public class App extends PApplet {
 
             Wave waveObj = new Wave(waveNumber, duration, preWavePause);
             wavesList.add(waveObj);
-
-            gameInterface = new GameInterface(this, layout, mapElement, wavesList, buttonElement);
         }
 
 
@@ -122,13 +117,11 @@ public class App extends PApplet {
             }
         }
 
-
         // get tower info 
         int initialTowerRange = configFile.getInt("initial_tower_range");
         double initialTowerFiringSpeed = configFile.getDouble("initial_tower_firing_speed");
         int initialTowerDamage = configFile.getInt("initial_tower_damage");
         int towerCost = configFile.getInt("tower_cost");
-
 
         // get mana info
         int initialMana = configFile.getInt("initial_mana");
@@ -138,6 +131,8 @@ public class App extends PApplet {
         int manaPoolSpellCostIncreasePerUse = configFile.getInt("mana_pool_spell_cost_increase_per_use");
         double manaPoolSpellCapMultiplier = configFile.getDouble("mana_pool_spell_cap_multiplier");
         double manaPoolSpellManaGainedMultiplier = configFile.getDouble("mana_pool_spell_mana_gained_multiplier");
+
+        Mana mana = new Mana(initialMana, initialManaCap, initialManaGainedPerSecond, manaPoolSpellInitialCost, manaPoolSpellCostIncreasePerUse, manaPoolSpellCapMultiplier, manaPoolSpellManaGainedMultiplier);
 
 
         // load images
@@ -157,13 +152,16 @@ public class App extends PApplet {
         mapElement.put("WIZARD_HOUSE", loadImage("src/main/resources/WizardTD/wizard_house.png"));
 
         // Button ff = new Button("FF", "2x speed", 645, 63);
-        buttonElement.put("FF", new Button("FF", "2x speed", 645, 63));
-        buttonElement.put("P", new Button("P", "PAUSE", 645, 123));
-        buttonElement.put("T", new Button("T", "Build\ntower", 645, 183));
-        buttonElement.put("U1", new Button("U1", "Upgrade\nrange", 645, 243));
-        buttonElement.put("U2", new Button("U2", "Upgrade\nspeed", 645, 303));
-        buttonElement.put("U3", new Button("U3", "Upgrade\ndamage", 645, 363));
-        buttonElement.put("M", new Button("M", "Mana pool\ncost: 100", 645, 423));
+        buttonElement.put("FF", new Button("FF", "2x speed", 'f', 645, 63));
+        buttonElement.put("P", new Button("P", "PAUSE", 'p', 645, 123));
+        buttonElement.put("T", new Button("T", "Build\ntower", 't', 645, 183));
+        buttonElement.put("U1", new Button("U1", "Upgrade\nrange", '1', 645, 243));
+        buttonElement.put("U2", new Button("U2", "Upgrade\nspeed", '2', 645, 303));
+        buttonElement.put("U3", new Button("U3", "Upgrade\ndamage", '3', 645, 363));
+        buttonElement.put("M", new Button("M", "Mana pool\ncost:", 'm', 645, 423));
+
+        gameInterface = new GameInterface(this, layout, mapElement, wavesList, mana, buttonElement);
+
     }
 
     /**
@@ -171,6 +169,13 @@ public class App extends PApplet {
      */
 	@Override
     public void keyPressed(){
+        for (Map.Entry<String, Button> entry : buttonElement.entrySet()) {
+            Button button = entry.getValue();
+
+            if (key == button.getHotKey()) {
+                button.updateStatus();
+            }
+        }
     }
 
     /**
@@ -186,8 +191,8 @@ public class App extends PApplet {
         for (Map.Entry<String, Button> entry : buttonElement.entrySet()) {
             Button button = entry.getValue();
 
-            if (button.hasOver()) {
-                button.setClicked();
+            if (button.hasMouseOver()) {
+                button.updateStatus();
             }
         }
     }
@@ -211,25 +216,8 @@ public class App extends PApplet {
 
         gameInterface.drawBackground();
         gameInterface.drawMap();
-
-        // if (currentWaveNumber < totalWaveNumber) {
-        //     currentWave = wavesList.get(currentWaveNumber);
-        //     if (currentWaveNumber + 1 < totalWaveNumber) {
-        //         nextWave = wavesList.get(currentWaveNumber + 1);
-        //     } else {
-        //         nextWave = null;
-        //     }
-        // }
-        // if (nextWave != null) {
-        //     if (nextWave.hasStarted()) {
-        //         currentWaveNumber += 1;
-        //     }
-        // }
-
         gameInterface.drawTimer();
-
         gameInterface.drawMana();
-        
         gameInterface.drawMenu();
 
     }
