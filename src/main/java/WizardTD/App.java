@@ -29,8 +29,8 @@ public class App extends PApplet {
 
     public Random random = new Random();
 
-    // initialise the layout content
-    private char[][] layout = new char[20][20];
+    // initialise the mapLayout content
+    private char[][] mapLayout = new char[20][20];
 
     // initialise all image resources for mapping
     private HashMap<String, PImage> mapElement = new HashMap<String , PImage>();
@@ -114,6 +114,34 @@ public class App extends PApplet {
 
         JSONObject configFile = loadJSONObject(configPath);
 
+        // get map layout
+        String layoutFile = configFile.getString("layout");
+        // extract content from the layout file (mapping layout)
+        String[] layoutTemp = loadStrings(layoutFile);
+        for (int i = 0; i < layoutTemp.length; i += 1) {
+            String row = layoutTemp[i];
+            for (int j = 0; j < row.length(); j += 1) {
+                mapLayout[i][j] = row.charAt(j);
+            }
+        }
+
+        // get tower info 
+        int initialTowerRange = configFile.getInt("initial_tower_range");
+        double initialTowerFiringSpeed = configFile.getDouble("initial_tower_firing_speed");
+        int initialTowerDamage = configFile.getInt("initial_tower_damage");
+        int towerCost = configFile.getInt("tower_cost");
+
+        // get mana info
+        int initialMana = configFile.getInt("initial_mana");
+        int initialManaCap = configFile.getInt("initial_mana_cap");
+        double initialManaGainedPerSecond = configFile.getDouble("initial_mana_gained_per_second");
+        int manaPoolSpellInitialCost = configFile.getInt("mana_pool_spell_initial_cost");
+        int manaPoolSpellCostIncreasePerUse = configFile.getInt("mana_pool_spell_cost_increase_per_use");
+        double manaPoolSpellCapMultiplier = configFile.getDouble("mana_pool_spell_cap_multiplier");
+        double manaPoolSpellManaGainedMultiplier = configFile.getDouble("mana_pool_spell_mana_gained_multiplier");
+
+        Mana mana = new Mana(initialMana, initialManaCap, initialManaGainedPerSecond, manaPoolSpellInitialCost, manaPoolSpellCostIncreasePerUse, manaPoolSpellCapMultiplier, manaPoolSpellManaGainedMultiplier);
+
         // retrieve the waves array
         // get infomation for each wave and store in an array "waves"
         JSONArray wavesContents = configFile.getJSONArray("waves");
@@ -141,44 +169,17 @@ public class App extends PApplet {
                 int manaGainedOnKill = monsterInfo.getInt("mana_gained_on_kill");
                 int quantity = monsterInfo.getInt("quantity");
 
-                Monster monster = new Monster(type, monsterElement.get(type), monsterDeathElement.get(type), hp, speed, armour, manaGainedOnKill);
-                monsterList.add(monster);
+                for (int k = 0; k < quantity; k += 1) {
+                    Monster monster = new Monster(type, monsterElement.get(type), monsterDeathElement.get(type), hp, speed, armour, manaGainedOnKill, mapLayout);
+                    monsterList.add(monster);
+                }
             }
 
             Wave waveObj = new Wave(waveNumber, duration, preWavePause, monsterList, monsterList.size());
             wavesList.add(waveObj);
         }
 
-
-        // get map layout
-        String layoutFile = configFile.getString("layout");
-        // extract content from the layout file (mapping layout)
-        String[] layoutTemp = loadStrings(layoutFile);
-        for (int i = 0; i < layoutTemp.length; i += 1) {
-            String row = layoutTemp[i];
-            for (int j = 0; j < row.length(); j += 1) {
-                layout[i][j] = row.charAt(j);
-            }
-        }
-
-        // get tower info 
-        int initialTowerRange = configFile.getInt("initial_tower_range");
-        double initialTowerFiringSpeed = configFile.getDouble("initial_tower_firing_speed");
-        int initialTowerDamage = configFile.getInt("initial_tower_damage");
-        int towerCost = configFile.getInt("tower_cost");
-
-        // get mana info
-        int initialMana = configFile.getInt("initial_mana");
-        int initialManaCap = configFile.getInt("initial_mana_cap");
-        double initialManaGainedPerSecond = configFile.getDouble("initial_mana_gained_per_second");
-        int manaPoolSpellInitialCost = configFile.getInt("mana_pool_spell_initial_cost");
-        int manaPoolSpellCostIncreasePerUse = configFile.getInt("mana_pool_spell_cost_increase_per_use");
-        double manaPoolSpellCapMultiplier = configFile.getDouble("mana_pool_spell_cap_multiplier");
-        double manaPoolSpellManaGainedMultiplier = configFile.getDouble("mana_pool_spell_mana_gained_multiplier");
-
-        Mana mana = new Mana(initialMana, initialManaCap, initialManaGainedPerSecond, manaPoolSpellInitialCost, manaPoolSpellCostIncreasePerUse, manaPoolSpellCapMultiplier, manaPoolSpellManaGainedMultiplier);
-
-        gameInterface = new GameInterface(this, layout, mapElement, wavesList, mana, buttonElement);
+        gameInterface = new GameInterface(this, mapLayout, mapElement, wavesList, mana, buttonElement);
 
     }
 
@@ -237,6 +238,8 @@ public class App extends PApplet {
         gameInterface.drawTimer();
         gameInterface.drawMana();
         gameInterface.drawMenu();
+
+        gameInterface.drawMonster();
 
     }
 

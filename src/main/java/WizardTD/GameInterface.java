@@ -20,7 +20,7 @@ public class GameInterface {
 
 	private PApplet app;
 
-	private char[][] layout;
+	private char[][] mapLayout;
 	private HashMap<String,PImage> mapElement;
     private int wizard_house_x, wizard_house_y;
 
@@ -35,10 +35,10 @@ public class GameInterface {
 	private HashMap<String, Button> buttonElement;
 
 
-	public GameInterface(PApplet app, char[][] layout, HashMap<String,PImage> mapElement, List<Wave> wavesList, Mana mana, HashMap<String, Button> buttonElement) {
+	public GameInterface(PApplet app, char[][] mapLayout, HashMap<String,PImage> mapElement, List<Wave> wavesList, Mana mana, HashMap<String, Button> buttonElement) {
 		this.app = app;
 
-		this.layout = layout;
+		this.mapLayout = mapLayout;
 		this.mapElement = mapElement;
         wizard_house_x = 0;
         wizard_house_y = 0;
@@ -74,20 +74,20 @@ public class GameInterface {
 	public void drawMap() {
 
         // y and x here correspond with the x and y coordinate
-        for (int y = 0; y < layout.length; y += 1) {
-            for (int x = 0; x < layout[y].length; x += 1) {
+        for (int y = 0; y < mapLayout.length; y += 1) {
+            for (int x = 0; x < mapLayout[y].length; x += 1) {
                 // every tile is 32*32
                 // 40 pixels for the menu bar
                 int pixel_x = x * 32;
                 int pixel_y = y * 32 + 40;
 
-                if (layout[y][x] == ' ') {
+                if (mapLayout[y][x] == ' ') {
                     app.image(mapElement.get("GRASS"), pixel_x, pixel_y);
                 }
-                else if (layout[y][x] == 'S') {
+                else if (mapLayout[y][x] == 'S') {
                     app.image(mapElement.get("SHRUB"), pixel_x, pixel_y);
                 }
-                else if (layout[y][x] == 'W') {
+                else if (mapLayout[y][x] == 'W') {
                     app.image(mapElement.get("GRASS"), pixel_x, pixel_y);
                     // store the position of wizard house
                     wizard_house_x = pixel_x;
@@ -98,16 +98,16 @@ public class GameInterface {
 
                     // check map edge
                     if (y-1 >= 0) { // check up edge
-                        up = layout[y-1][x];
+                        up = mapLayout[y-1][x];
                     }
                     if (y+1 < 20) { // check down edge
-                        down = layout[y+1][x];
+                        down = mapLayout[y+1][x];
                     }
                     if (x-1 >= 0) { // check left edge
-                        left = layout[y][x-1];
+                        left = mapLayout[y][x-1];
                     }
                     if (x+1 < 20) { // check right edge
-                       right = layout[y][x+1]; 
+                       right = mapLayout[y][x+1]; 
                     }
 
                     if (up == 'X' && down == 'X' && left == 'X' && right == 'X') {
@@ -191,6 +191,7 @@ public class GameInterface {
 	            	}
 				}
 			}
+
         }
 
 
@@ -264,6 +265,22 @@ public class GameInterface {
 	        app.textSize(12);
 	        app.text(button.getDesciption(), 698, button.getY() + 20);
     	}
+
+    }
+
+
+    public void drawMonster() {
+
+        for (Monster monster : currentWave.getMonsterList()) {
+            app.image(monster.getImage(), monster.getPosition()[0], monster.getPosition()[1]);
+            if (!buttonElement.get("P").isOn()) {
+                if (buttonElement.get("FF").isOn()) {
+                    monster.move((float)(2 * monster.getSpeed()/frameRate));
+                } else {
+                    monster.move((float)(1 * monster.getSpeed()/frameRate));
+                }
+            }   
+        }
 
     }
 

@@ -71,6 +71,10 @@ public class Wave {
         return monsterQuantity;
     }
 
+    public List<Monster> getMonsterList() {
+    	return monsterList;
+    }
+
 	public void setStarted(boolean started) {
 		this.started = started;
 	}
