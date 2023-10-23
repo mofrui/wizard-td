@@ -53,6 +53,11 @@ public class Button {
     }
 
 
+    public void setButtonStatus(boolean newStatus) {
+    	status = newStatus;
+    }
+
+
     public boolean hasMouseOver() {
     	return mouseOver;
     }

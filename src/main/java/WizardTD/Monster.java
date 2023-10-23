@@ -88,12 +88,17 @@ public class Monster {
 
 
     public float[] getPosition() {
-        return new float[]{x * 32, y * 32 + 40};
+        return new float[]{x * 32 + 5, y * 32 + 45};
     }
 
 
     public PImage getImage() {
         return image;
+    }
+
+
+    public List<PImage> getDeathAnimation() {
+        return deathAnimation;
     }
 
 
@@ -201,15 +206,15 @@ public class Monster {
 
     public void move(float distance) {
         if (currentPosition.pointNext != null) {
-            if (Math.abs(x - currentPosition.pointNext.x) < 0.001 && Math.abs(y - currentPosition.pointNext.y) < 0.001) {
+            if (Math.abs(x - currentPosition.pointNext.x) < 0.02 && Math.abs(y - currentPosition.pointNext.y) < 0.02) {
                 currentPosition = currentPosition.pointNext;
-            } else if (Math.abs(x - currentPosition.pointNext.x) != 0 && Math.abs(y - currentPosition.pointNext.y) < 0.001) {
+            } else if (Math.abs(x - currentPosition.pointNext.x) != 0 && Math.abs(y - currentPosition.pointNext.y) < 0.02) {
                 if (x > currentPosition.pointNext.x) {
                     x -= distance;
                 } else {
                     x += distance;
                 }
-            } else if (Math.abs(x - currentPosition.pointNext.x) < 0.001 && Math.abs(y - currentPosition.pointNext.y) != 0) {
+            } else if (Math.abs(x - currentPosition.pointNext.x) < 0.02 && Math.abs(y - currentPosition.pointNext.y) != 0) {
                 if (y > currentPosition.pointNext.y) {
                     y -= distance;
                 } else {
@@ -217,6 +222,11 @@ public class Monster {
                 }
             }
         }
+    }
+
+
+    public boolean hasReachedWizardHouse() {
+        return (currentPosition.pointNext == null);
     }
 }
 

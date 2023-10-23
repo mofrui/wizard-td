@@ -156,7 +156,7 @@ public class App extends PApplet {
 
             // access and iterate over monsters within the wave
             JSONArray monsters = waveEach.getJSONArray("monsters");
-            List<Monster> monsterList = new ArrayList();
+            HashMap<Monster, Integer> monsterDict = new HashMap<>();
 
             for (int j = 0; j < monsters.size(); j++) {
                 JSONObject monsterInfo = monsters.getJSONObject(j);
@@ -169,13 +169,11 @@ public class App extends PApplet {
                 int manaGainedOnKill = monsterInfo.getInt("mana_gained_on_kill");
                 int quantity = monsterInfo.getInt("quantity");
 
-                for (int k = 0; k < quantity; k += 1) {
-                    Monster monster = new Monster(type, monsterElement.get(type), monsterDeathElement.get(type), hp, speed, armour, manaGainedOnKill, mapLayout);
-                    monsterList.add(monster);
-                }
+                Monster monster = new Monster(type, monsterElement.get(type), monsterDeathElement.get(type), hp, speed, armour, manaGainedOnKill, mapLayout);
+                monsterDict.put(monster, quantity);
             }
 
-            Wave waveObj = new Wave(waveNumber, duration, preWavePause, monsterList, monsterList.size());
+            Wave waveObj = new Wave(waveNumber, duration, preWavePause, monsterDict);
             wavesList.add(waveObj);
         }
 
@@ -188,6 +186,12 @@ public class App extends PApplet {
      */
 	@Override
     public void keyPressed(){
+        if (gameInterface.isGameLost()){
+            if (key == 'r' || key == 'R'){
+                setup();
+            }
+        }
+
         for (Map.Entry<String, Button> entry : buttonElement.entrySet()) {
             Button button = entry.getValue();
 
@@ -240,6 +244,10 @@ public class App extends PApplet {
         gameInterface.drawMenu();
 
         gameInterface.drawMonster();
+
+        if (gameInterface.isGameLost()) {
+            gameInterface.drawGameLost();
+        }
 
     }
 

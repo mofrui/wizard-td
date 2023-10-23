@@ -22,7 +22,6 @@ public class GameInterface {
 
 	private char[][] mapLayout;
 	private HashMap<String,PImage> mapElement;
-    private int wizard_house_x, wizard_house_y;
 
 	private List<Wave> wavesList;
 	private Wave currentWave;
@@ -34,14 +33,23 @@ public class GameInterface {
 
 	private HashMap<String, Button> buttonElement;
 
+    private List<Monster> currentMonsterList;
 
-	public GameInterface(PApplet app, char[][] mapLayout, HashMap<String,PImage> mapElement, List<Wave> wavesList, Mana mana, HashMap<String, Button> buttonElement) {
+    private boolean gameLost;
+
+
+	public GameInterface(
+        PApplet app,
+        char[][] mapLayout,
+        HashMap<String,PImage> mapElement,
+        List<Wave> wavesList,
+        Mana mana,
+        HashMap<String, Button> buttonElement) {
+
 		this.app = app;
 
 		this.mapLayout = mapLayout;
 		this.mapElement = mapElement;
-        wizard_house_x = 0;
-        wizard_house_y = 0;
 
 		this.wavesList = wavesList;
 		currentWaveNumber = 0;
@@ -50,6 +58,11 @@ public class GameInterface {
         this.mana = mana;
 
 		this.buttonElement = buttonElement;
+
+        this.currentMonsterList = new ArrayList<Monster>();
+
+        this.gameLost = false;
+
 	}
 
 
@@ -73,6 +86,7 @@ public class GameInterface {
 
 	public void drawMap() {
 
+        int wizard_house_x = 0, wizard_house_y = 0;
         // y and x here correspond with the x and y coordinate
         for (int y = 0; y < mapLayout.length; y += 1) {
             for (int x = 0; x < mapLayout[y].length; x += 1) {
@@ -205,6 +219,11 @@ public class GameInterface {
 
     public void drawMana() {
 
+        if (mana.getCurrentMana() < 0) {
+            gameLost = true;
+            buttonElement.get("P").setButtonStatus(true);
+        }
+
         app.textSize(20);
         app.fill(0, 0, 0);
         app.text("MANA:", 345, 30);
@@ -223,7 +242,7 @@ public class GameInterface {
 
         app.textSize(20);
         app.fill(0, 0, 0);
-        app.text(mana.getCurrentMana() + "/" + mana.getManaCap(), 520, 27);
+        app.text((int)mana.getCurrentMana() + "/" + mana.getManaCap(), 520, 27);
 
         if (buttonElement.get("M").isOn()) {
             mana.upgradeMana();
@@ -271,17 +290,72 @@ public class GameInterface {
 
     public void drawMonster() {
 
-        for (Monster monster : currentWave.getMonsterList()) {
-            app.image(monster.getImage(), monster.getPosition()[0], monster.getPosition()[1]);
-            if (!buttonElement.get("P").isOn()) {
-                if (buttonElement.get("FF").isOn()) {
-                    monster.move((float)(2 * monster.getSpeed()/frameRate));
-                } else {
-                    monster.move((float)(1 * monster.getSpeed()/frameRate));
+        if (!buttonElement.get("P").isOn()) {
+            // if the time passed is a multiple of the spawn time interval, then spawn a new monster
+            if ( ((currentWave.getDuration() - currentWave.getRemainingTime()) % currentWave.getSpawnInterval(buttonElement.get("FF").isOn())) < 0.04) {
+                if (currentWave.hasRemainingMonster()) {
+                    Monster m = currentWave.getRandomMonster();
+                    Monster monster = new Monster(
+                        m.getType(),
+                        m.getImage(),
+                        m.getDeathAnimation(),
+                        m.getFullHp(),
+                        m.getSpeed(),
+                        m.getArmour(),
+                        m.getManaGainedOnKill(),
+                        mapLayout
+                    );
+                    currentMonsterList.add(monster);
                 }
-            }   
+            }
         }
 
+        List<Monster> toRemove = new ArrayList<>();
+        
+        if (currentMonsterList.size() > 0) {
+            for (Monster monster : currentMonsterList) {
+                app.image(monster.getImage(), monster.getPosition()[0], monster.getPosition()[1]);
+                if (!buttonElement.get("P").isOn()) {
+                    if (buttonElement.get("FF").isOn()) {
+                        monster.move((float)(2 * monster.getSpeed()/frameRate));
+                    } else {
+                        monster.move((float)(1 * monster.getSpeed()/frameRate));
+                    }
+                }
+                if (monster.hasReachedWizardHouse()) {
+                    mana.decreaseCurrentMana(monster.getCurrentHp());
+                    toRemove.add(monster);
+                }
+            }
+        }
+
+        // remove monster
+        for (Monster monsterToRemove : toRemove) {
+            Iterator<Monster> iterator = currentMonsterList.iterator();
+            while (iterator.hasNext()) {
+                Monster m = iterator.next();
+                if (m == monsterToRemove) {
+                    iterator.remove(); // Safely remove the monster
+                    break;
+                }
+            }
+        }
+
+
+    }
+
+
+    public void drawGameLost() {
+        app.fill(0, 255, 0);
+        app.textSize(30);
+        app.text("You LOST", 320, 320);
+        app.textSize(20);
+        app.text("press 'r' to restart", 320, 360);
+    }
+
+
+    public boolean isGameLost() {
+        return gameLost;
     }
 
 }

@@ -25,6 +25,7 @@ public class Mana {
     private double manaPoolSpellCapMultiplier;
     private double manaPoolSpellManaGainedMultiplier;
 
+
     public Mana(int initialMana, int initialManaCap, double initialManaGainedPerSecond, int manaPoolSpellInitialCost, int manaPoolSpellCostIncreasePerUse, double manaPoolSpellCapMultiplier, double manaPoolSpellManaGainedMultiplier) {
 
     	this.currentMana = initialMana;
@@ -37,21 +38,26 @@ public class Mana {
     	this.manaPoolSpellManaGainedMultiplier = manaPoolSpellManaGainedMultiplier;
     }
 
-    public int getCurrentMana() {
-    	return (int)currentMana;
+
+    public double getCurrentMana() {
+    	return currentMana;
     }
+
 
     public int getManaCap() {
     	return manaCap;
     }
 
+
     public int getManaPoolSpellCost() {
     	return manaPoolSpellCost;
     }
 
+
     public float getManaPercentage() {
     	return ((int)currentMana * 300 / manaCap);
     }
+
 
     public void increaseCurrentManaByTime(double time) {
     	if (currentMana < manaCap) {
@@ -59,8 +65,15 @@ public class Mana {
     	}
     }
 
-    public void decreaseCurrentMana() {
+
+    public void decreaseCurrentMana(int amount) {
+        if (currentMana - amount >= 0) {
+            currentMana -= amount;
+        } else {
+            currentMana = -0.1;
+        }
     }
+
 
     public void upgradeMana() {
     	if (currentMana - manaPoolSpellCost >= 0) {
