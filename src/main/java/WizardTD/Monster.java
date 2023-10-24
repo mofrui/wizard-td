@@ -27,6 +27,8 @@ public class Monster {
     private int xStart;
     private int yStart;
 
+    private boolean dying;
+    private int dyingCounter;
     private boolean dead;
 
     private char lastMove = ' ';
@@ -51,6 +53,8 @@ public class Monster {
         setSpawnPosition();
         findPath();
 
+        this.dying = false;
+        this.dyingCounter = 0;
         this.dead = false;
 
     }
@@ -110,8 +114,41 @@ public class Monster {
         currentHp -= armour * damage;
         if (currentHp <= 0) {
             currentHp = 0;
+            dying = true;
+        }
+    }
+
+
+    public void updateDyingImage() {
+        if (dying){
+            switch(dyingCounter) {
+            case 3:
+                image = deathAnimation.get(0);
+                break;
+            case 7:
+                image = deathAnimation.get(1);
+                break;
+            case 11:
+                image = deathAnimation.get(2);
+                break;
+            case 15:
+                image = deathAnimation.get(3);
+                break;
+            case 29:
+                image = deathAnimation.get(4);
+                break;
+            }
+            dyingCounter += 1;  
+        }
+        if (dyingCounter == 20) {
+            dying = false;
             dead = true;
         }
+    }
+
+
+    public boolean isDying() {
+        return dying;
     }
 
 

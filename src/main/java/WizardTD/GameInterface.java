@@ -346,13 +346,21 @@ public class GameInterface {
                 app.fill(0, 255, 0);
                 app.noStroke();
                 app.rect(monster.getPosition()[0] - 5, monster.getPosition()[1] - 7, monster.getHpPercentage(), 3);
-                
-                if (!buttonElement.get("P").isOn()) {
-                    if (buttonElement.get("FF").isOn()) {
+
+
+                if (monster.isDying()) {
+                    if (!buttonElement.get("P").isOn()) {
+                        monster.updateDyingImage();
+                    }
+                } else {
+                    if (!buttonElement.get("P").isOn()) {
+                        if (buttonElement.get("FF").isOn()) {
+                            monster.move((float)(monster.getSpeed()/20));
+                        }
                         monster.move((float)(monster.getSpeed()/20));
                     }
-                    monster.move((float)(monster.getSpeed()/20));
                 }
+                
                 if (monster.hasReachedWizardHouse()) {
                     mana.decreaseCurrentMana(monster.getCurrentHp());
                     monster.banishMonster();
