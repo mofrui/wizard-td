@@ -21,10 +21,15 @@ public class Tower {
 	private int initialDamage;
 
 	private PImage image;
-	private HashMap<Integer, PImage> imageList; 
+	private HashMap<Integer, PImage> imageList;
+	private PImage bulletImage;
+
+	private List<Bullet> bulletList;
+
+	private double fireCoolDown;
 
 
-	public Tower(float xPos, float yPos, int range, double speed, int damage, HashMap<Integer, PImage> imageList) {
+	public Tower(float xPos, float yPos, int range, double speed, int damage, HashMap<Integer, PImage> imageList, PImage bulletImage) {
 
 		setPosition(xPos, yPos);
 
@@ -40,7 +45,11 @@ public class Tower {
 
 		this.imageList = imageList;
 		this.image = imageList.get(1);
+		this.bulletImage = bulletImage;
 
+		this.bulletList = new ArrayList<Bullet>();
+
+		this.fireCoolDown = 0;
 
 	}
 
@@ -67,6 +76,49 @@ public class Tower {
 
     public int getRange() {
     	return range;
+    }
+
+
+    public int getUpgradeCost(char typeFlag) {
+
+    	int cost = 0;
+
+    	switch (typeFlag) {
+        case 'r':
+            cost = (rangeLevel < 3 ? 10 + rangeLevel * 10 : 0);
+            break;
+        case 's':
+            cost = (speedLevel < 3 ? 10 + speedLevel * 10 : 0);
+            break;
+        case 'd':
+            cost = (damageLevel < 3 ? 10 + damageLevel * 10 : 0);
+            break;
+    }
+
+    	return cost;
+
+    }
+
+
+    public void fire(Monster target) {
+    	Bullet bullet = new Bullet(this.getPosition()[0], this.getPosition()[1], damage, target, bulletImage);
+    	bulletList.add(bullet);
+    	fireCoolDown = 1/speed;
+    }
+
+
+    public void updateFireCoolDown(double time) {
+    	fireCoolDown -= time;
+    }
+
+
+    public boolean isReadyToFire() {
+    	return (fireCoolDown <= 0);
+    }
+
+
+    public List<Bullet> getBulletList() {
+    	return bulletList;
     }
 
 }

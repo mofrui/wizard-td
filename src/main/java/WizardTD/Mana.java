@@ -51,9 +51,20 @@ public class Mana {
 
 
     public void increaseCurrentManaByTime(double time) {
-    	if (currentMana < manaCap) {
+    	if ((currentMana + time * manaGainedRate) <= manaCap) {
     		currentMana += time * manaGainedRate;
-    	}
+    	} else {
+            currentMana = manaCap;
+        }
+    }
+
+
+    public void increaseCurrentMana(int amount) {
+        if ((currentMana + amount) <= manaCap) {
+            currentMana += amount;
+        } else {
+            currentMana = manaCap;
+        }
     }
 
 

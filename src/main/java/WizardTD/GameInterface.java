@@ -42,6 +42,8 @@ public class GameInterface {
     private int initialTowerDamage;
     private int towerCost;
 
+    private PImage bulletImage;
+
     private boolean gameLost;
 
 
@@ -56,7 +58,8 @@ public class GameInterface {
         int initialTowerRange,
         double initialTowerFiringSpeed,
         int initialTowerDamage,
-        int towerCost) {
+        int towerCost,
+        PImage bulletImage) {
 
 		this.app = app;
 
@@ -79,6 +82,8 @@ public class GameInterface {
         this.initialTowerFiringSpeed = initialTowerFiringSpeed;
         this.initialTowerDamage = initialTowerDamage;
         this.towerCost = towerCost;
+
+        this.bulletImage = bulletImage;
 
         this.gameLost = false;
 
@@ -354,6 +359,10 @@ public class GameInterface {
                     mana.decreaseCurrentMana(monster.getCurrentHp());
                     toRemove.add(monster);
                 }
+                if (monster.isDead()) {
+                    toRemove.add(monster);
+                    mana.increaseCurrentMana(monster.getManaGainedOnKill());
+                }
             }
         }
 
@@ -378,15 +387,82 @@ public class GameInterface {
             for (Tower tower : currentTowerList) {
                 app.image(tower.getImage(), tower.getPosition()[0], tower.getPosition()[1]);
                 
-                // draw tower range
+                // draw tower details
                 if (tower.isOver(app.mouseX, app.mouseY)) {
+                    // draw range
                     app.noFill();
                     app.stroke(255, 255, 0);
                     app.strokeWeight(2);
                     app.ellipse(tower.getPosition()[0]+32/2, tower.getPosition()[1]+32/2, tower.getRange()*2, tower.getRange()*2);
                     app.stroke(0, 0, 0);
                     app.strokeWeight(1);
+                    
+                    // draw upgrade details
+                    app.textSize(10);
+                    app.fill(255, 255, 255);
+                    app.rect(650, 540, 90, 20);
+                    app.rect(650, 560, 90, 60);
+                    app.rect(650, 620, 90, 20);
+                    app.fill(0, 0, 0);
+
+                    int rangeFee = 0, speedFee = 0, damageFee = 0;
+                    if (buttonElement.get("U1").isOn()) {
+                        rangeFee = tower.getUpgradeCost('r');
+                    }
+                    if (buttonElement.get("U2").isOn()) {
+                        speedFee = tower.getUpgradeCost('s');
+                    }
+                    if (buttonElement.get("U3").isOn()) {
+                        damageFee = tower.getUpgradeCost('d');
+                    }
+                    app.text("Upgrade cost", 655, 555);
+                    app.text("range:\t" + rangeFee, 655, 575);
+                    app.text("speed:\t" + speedFee, 655, 595);
+                    app.text("damage:\t" + damageFee, 655, 615);
+                    app.text("Total:\t" + (rangeFee+speedFee+damageFee), 655, 635);
                 }
+
+                // draw bullet
+                if (currentMonsterList.size() > 0) {
+                    for (Monster monster : currentMonsterList) {
+                        float distance = app.dist(tower.getPosition()[0], tower.getPosition()[1], monster.getPosition()[0], monster.getPosition()[1]);
+                        if (buttonElement.get("FF").isOn()) {
+                            tower.updateFireCoolDown(2.0 / frameRate);
+                        } else {
+                            tower.updateFireCoolDown(1.0 / frameRate);
+                        }
+                        if (distance < tower.getRange() && tower.isReadyToFire()) {
+                            tower.fire(monster);
+                        }
+                    }   
+                }
+
+                List<Bullet> toRemove = new ArrayList<>();
+
+                if (tower.getBulletList().size() > 0) {
+                    for (Bullet bullet : tower.getBulletList()) {
+                        bullet.move(buttonElement.get("FF").isOn());
+                        bullet.makeDamage();
+                        if (! bullet.isHide()) {
+                            app.image(bullet.getImage(), bullet.getPosition()[0], bullet.getPosition()[1]);
+                        } else {
+                            toRemove.add(bullet);
+                        }
+                    }
+                }
+
+                // remove monster
+                for (Bullet bulletToRemove : toRemove) {
+                    Iterator<Bullet> iterator = tower.getBulletList().iterator();
+                    while (iterator.hasNext()) {
+                        Bullet b = iterator.next();
+                        if (b == bulletToRemove) {
+                            iterator.remove(); // Safely remove the monster
+                            break;
+                }
+            }
+        }
+
             }
         }
     }
@@ -415,14 +491,10 @@ public class GameInterface {
                         return;
                     }
                 }
-                Tower tower = new Tower(app.mouseX, app.mouseY, initialTowerRange, initialTowerFiringSpeed, initialTowerDamage, towerElement);
-                currentTowerList.add(tower);
-                mana.decreaseCurrentMana(towerCost);
-            } else {
-                Tower tower = new Tower(app.mouseX, app.mouseY, initialTowerRange, initialTowerFiringSpeed, initialTowerDamage, towerElement);
-                currentTowerList.add(tower);
-                mana.decreaseCurrentMana(towerCost);
             }
+            Tower tower = new Tower(app.mouseX, app.mouseY, initialTowerRange, initialTowerFiringSpeed, initialTowerDamage, towerElement, bulletImage);
+            currentTowerList.add(tower);
+            mana.decreaseCurrentMana(towerCost);
             
         }
         buttonElement.get("T").setButtonStatus(false);

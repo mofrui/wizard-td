@@ -44,6 +44,8 @@ public class App extends PApplet {
     // stores waves objects
     private List<Wave> wavesList = new ArrayList<>();
 
+    private PImage bulletImage;
+
     private GameInterface gameInterface;
 
     public App() {
@@ -114,6 +116,7 @@ public class App extends PApplet {
         towerElement.put(2, loadImage("src/main/resources/WizardTD/tower1.png"));
         towerElement.put(3, loadImage("src/main/resources/WizardTD/tower2.png"));
 
+        bulletImage = loadImage("src/main/resources/WizardTD/fireball.png");
 
         JSONObject configFile = loadJSONObject(configPath);
 
@@ -176,11 +179,11 @@ public class App extends PApplet {
                 monsterDict.put(monster, quantity);
             }
 
-            Wave waveObj = new Wave(waveNumber, duration, preWavePause, monsterDict);
-            wavesList.add(waveObj);
+            Wave wave = new Wave(waveNumber, duration, preWavePause, monsterDict);
+            wavesList.add(wave);
         }
 
-        gameInterface = new GameInterface(this, mapLayout, mapElement, wavesList, mana, buttonElement, towerElement, initialTowerRange, initialTowerFiringSpeed, initialTowerDamage, towerCost);
+        gameInterface = new GameInterface(this, mapLayout, mapElement, wavesList, mana, buttonElement, towerElement, initialTowerRange, initialTowerFiringSpeed, initialTowerDamage, towerCost, bulletImage);
 
     }
 

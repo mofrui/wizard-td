@@ -26,6 +26,8 @@ public class Monster {
     private int xStart;
     private int yStart;
 
+    private boolean dead;
+
     private char lastMove = ' ';
     private boolean firstMove = true;
 
@@ -47,6 +49,8 @@ public class Monster {
         
         setSpawnPosition();
         findPath();
+
+        this.dead = false;
 
     }
 
@@ -98,6 +102,20 @@ public class Monster {
 
     public float getHpPercentage() {
         return ((int)currentHp * 29 / fullHp);
+    }
+
+
+    public void takeDamage(int damage) {
+        currentHp -= armour * damage;
+        if (currentHp <= 0) {
+            currentHp = 0;
+            dead = true;
+        }
+    }
+
+
+    public boolean isDead() {
+        return dead;
     }
 
 
