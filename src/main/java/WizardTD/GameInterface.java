@@ -60,7 +60,8 @@ public class GameInterface {
         double initialTowerFiringSpeed,
         int initialTowerDamage,
         int towerCost,
-        PImage bulletImage) {
+        PImage bulletImage
+    ) {
 
 		this.app = app;
 
@@ -87,7 +88,6 @@ public class GameInterface {
         this.bulletImage = bulletImage;
 
         this.gameLost = false;
-
 	}
 
 
@@ -275,7 +275,6 @@ public class GameInterface {
         app.textSize(12);
         app.fill(10, 0, 0);
         app.text(mana.getManaPoolSpellCost(), 728, 463);
-
     }
 
 
@@ -306,7 +305,6 @@ public class GameInterface {
 	        app.textSize(12);
 	        app.text(button.getDesciption(), 698, button.getY() + 20);
     	}
-
     }
 
 
@@ -383,49 +381,39 @@ public class GameInterface {
                 }
             }
         }
-
     }
 
 
-    public void drawTower() {
+    public void drawTowerGameField() {
 
         if (currentTowerList.size() > 0) {
             for (Tower tower : currentTowerList) {
+                
+                // draw tower image
+                tower.updateImage();
                 app.image(tower.getImage(), tower.getPosition()[0], tower.getPosition()[1]);
                 
-                // draw tower details
-                if (tower.isOver(app.mouseX, app.mouseY)) {
-                    // draw range
+                // draw upgrade details
+                if (tower.getUpgradeLevel('s') != 0) {
+                    app.strokeWeight(tower.getUpgradeLevel('s') + 0.5f);
+                    app.stroke(173, 216, 230);
                     app.noFill();
-                    app.stroke(255, 255, 0);
-                    app.strokeWeight(2);
-                    app.ellipse(tower.getPosition()[0]+32/2, tower.getPosition()[1]+32/2, tower.getRange()*2, tower.getRange()*2);
+                    app.rect(tower.getPosition()[0] + 5, tower.getPosition()[1] + 5, 20, 20);
                     app.stroke(0, 0, 0);
                     app.strokeWeight(1);
-                    
-                    // draw upgrade details
+                }
+                for (int i = 0; i < tower.getUpgradeLevel('r'); i += 1) {
+                    app.noFill();
+                    app.stroke(218, 112, 214);
+                    app.strokeWeight(2);
+                    app.ellipse(tower.getPosition()[0] + 6 + i * 10, tower.getPosition()[1] + 5, 5, 5);
+                    app.stroke(0, 0, 0);
+                    app.strokeWeight(1);
+                }
+                for (int i = 0; i < tower.getUpgradeLevel('d'); i += 1) {
+                    app.fill(218, 112, 214);
                     app.textSize(10);
-                    app.fill(255, 255, 255);
-                    app.rect(650, 540, 90, 20);
-                    app.rect(650, 560, 90, 60);
-                    app.rect(650, 620, 90, 20);
-                    app.fill(0, 0, 0);
-
-                    int rangeFee = 0, speedFee = 0, damageFee = 0;
-                    if (buttonElement.get("U1").isOn()) {
-                        rangeFee = tower.getUpgradeCost('r');
-                    }
-                    if (buttonElement.get("U2").isOn()) {
-                        speedFee = tower.getUpgradeCost('s');
-                    }
-                    if (buttonElement.get("U3").isOn()) {
-                        damageFee = tower.getUpgradeCost('d');
-                    }
-                    app.text("Upgrade cost", 655, 555);
-                    app.text("range:\t" + rangeFee, 655, 575);
-                    app.text("speed:\t" + speedFee, 655, 595);
-                    app.text("damage:\t" + damageFee, 655, 615);
-                    app.text("Total:\t" + (rangeFee+speedFee+damageFee), 655, 635);
+                    app.text("X", tower.getPosition()[0] + 3 + i * 10, tower.getPosition()[1] + 30);
                 }
 
                 // draw bullet
@@ -480,17 +468,78 @@ public class GameInterface {
     }
 
 
+    public void drawTowerInfo() {
+
+        if (currentTowerList.size() > 0) {
+            for (Tower tower : currentTowerList) {
+                // draw tower info
+                if (tower.isOver(app.mouseX, app.mouseY)) {
+                    // draw range
+                    app.noFill();
+                    app.stroke(255, 255, 0);
+                    app.strokeWeight(2);
+                    app.ellipse(tower.getPosition()[0]+32/2, tower.getPosition()[1]+32/2, tower.getRange()*2, tower.getRange()*2);
+                    app.stroke(0, 0, 0);
+                    app.strokeWeight(1);
+                    
+                    // draw upgrade details
+                    app.textSize(10);
+                    app.fill(255, 255, 255);
+                    app.rect(650, 540, 90, 20);
+                    app.rect(650, 560, 90, 60);
+                    app.rect(650, 620, 90, 20);
+                    app.fill(0, 0, 0);
+
+                    int rangeFee = 0, speedFee = 0, damageFee = 0;
+                    if (buttonElement.get("U1").isOn()) {
+                        rangeFee = tower.getUpgradeCost('r');
+                    }
+                    if (buttonElement.get("U2").isOn()) {
+                        speedFee = tower.getUpgradeCost('s');
+                    }
+                    if (buttonElement.get("U3").isOn()) {
+                        damageFee = tower.getUpgradeCost('d');
+                    }
+                    app.text("Upgrade cost", 655, 555);
+                    app.text("range:\t" + rangeFee, 655, 575);
+                    app.text("speed:\t" + speedFee, 655, 595);
+                    app.text("damage:\t" + damageFee, 655, 615);
+                    app.text("Total:\t" + (rangeFee+speedFee+damageFee), 655, 635);
+                }
+            }
+        }
+    }
+
+
     public void drawWizardHouse() {
         app.image(mapElement.get("WIZARD_HOUSE"), wizard_house_x, wizard_house_y - 8);
     }
 
 
     public void drawGameLost() {
+        app.fill(0, 0, 0);
+        app.rect(270, 270, 100, 100);
         app.fill(0, 255, 0);
         app.textSize(30);
         app.text("You LOST", 320, 320);
         app.textSize(20);
         app.text("press 'r' to restart", 320, 360);
+    }
+
+
+    public void drawGameWin() {
+        app.fill(0, 0, 0);
+        app.rect(270, 270, 100, 100);
+        app.fill(0, 255, 0);
+        app.textSize(30);
+        app.text("You WIN", 320, 320);
+        app.textSize(20);
+        app.text("press 'r' to restart", 320, 360);
+    }
+
+
+    public boolean isGameWin() {
+        return (currentWaveNumber+1 == totalWaveNumber && (int)currentWave.getRemainingTime() == 0 && currentMonsterList.size() == 0);
     }
 
 
@@ -501,7 +550,20 @@ public class GameInterface {
 
     public void buildNewTower() {
 
-        if (mana.getCurrentMana() - towerCost >= 0 && (mapLayout[(int)(app.mouseY-40)/32][(int)app.mouseX/32] == ' ')) {
+        int cost = towerCost;
+
+        if (buttonElement.get("U1").isOn()) {
+            cost += 20;
+        }
+        if (buttonElement.get("U2").isOn()) {
+            cost += 20;
+        }
+        if (buttonElement.get("U3").isOn()) {
+            cost += 20;
+        }
+
+        if (mana.getCurrentMana() >= cost && (mapLayout[(int)(app.mouseY-40)/32][(int)app.mouseX/32] == ' ')) {
+            
             if (currentTowerList.size() > 0) {
                 for (Tower tower : currentTowerList) {
                     if (tower.isOver(app.mouseX, app.mouseY)) {
@@ -509,13 +571,68 @@ public class GameInterface {
                     }
                 }
             }
+
             Tower tower = new Tower(app.mouseX, app.mouseY, initialTowerRange, initialTowerFiringSpeed, initialTowerDamage, towerElement, bulletImage);
+            
+            // upgrade tower
+            if (buttonElement.get("U1").isOn()) {
+                tower.upgradeTower('r');
+            }
+            if (buttonElement.get("U2").isOn()) {
+                tower.upgradeTower('s');
+            }
+            if (buttonElement.get("U3").isOn()) {
+                tower.upgradeTower('d');
+            }
+
             currentTowerList.add(tower);
             mana.decreaseCurrentMana(towerCost);
-            
         }
-        buttonElement.get("T").setButtonStatus(false);
 
+        buttonElement.get("T").setButtonStatus(false);
+        buttonElement.get("U1").setButtonStatus(false);
+        buttonElement.get("U2").setButtonStatus(false);
+        buttonElement.get("U3").setButtonStatus(false);
     }
 
+
+    public void upgradeTower() {
+        
+        if (currentTowerList.size() > 0) {
+            for (Tower tower : currentTowerList) {
+                if (tower.isOver(app.mouseX, app.mouseY)) {
+                    int upgradeCost = 0;
+
+                    if (buttonElement.get("U1").isOn()) {
+                        upgradeCost += tower.getUpgradeCost('r');
+                    }
+                    if (buttonElement.get("U2").isOn()) {
+                        upgradeCost += tower.getUpgradeCost('s');
+                    }
+                    if (buttonElement.get("U3").isOn()) {
+                        upgradeCost += tower.getUpgradeCost('d');
+                    }
+
+                    if (mana.getCurrentMana() >= upgradeCost) {
+                        if (buttonElement.get("U1").isOn()) {
+                            tower.upgradeTower('r');
+                        }
+                        if (buttonElement.get("U2").isOn()) {
+                            tower.upgradeTower('s');
+                        }
+                        if (buttonElement.get("U3").isOn()) {
+                            tower.upgradeTower('d');
+                        }
+                        mana.decreaseCurrentMana(upgradeCost);
+                    }
+                }
+            }
+        }
+
+        buttonElement.get("U1").setButtonStatus(false);
+        buttonElement.get("U2").setButtonStatus(false);
+        buttonElement.get("U3").setButtonStatus(false);
+    }
 }
+
+

@@ -30,19 +30,19 @@ public class App extends PApplet {
     public Random random = new Random();
 
     // initialise the mapLayout content
-    private char[][] mapLayout = new char[20][20];
+    private char[][] mapLayout;
 
     // initialise all image resources for mapping
-    private HashMap<String, PImage> mapElement = new HashMap<String , PImage>();
-    private HashMap<String, Button> buttonElement = new HashMap<String, Button>();
+    private HashMap<String, PImage> mapElement;
+    private HashMap<String, Button> buttonElement;
     
-    private HashMap<String, PImage> monsterElement = new HashMap<String, PImage>();
-    private HashMap<String, List<PImage>> monsterDeathElement = new HashMap<String, List<PImage>>();
+    private HashMap<String, PImage> monsterElement;
+    private HashMap<String, List<PImage>> monsterDeathElement;
     
-    private HashMap<Integer, PImage> towerElement = new HashMap<Integer, PImage>();
+    private HashMap<Integer, PImage> towerElement;
 
     // stores waves objects
-    private List<Wave> wavesList = new ArrayList<>();
+    private List<Wave> wavesList;
 
     private PImage bulletImage;
 
@@ -66,6 +66,18 @@ public class App extends PApplet {
      */
 	@Override
     public void setup() {
+
+        mapLayout = new char[20][20];
+        mapElement = new HashMap<String , PImage>();
+
+        buttonElement = new HashMap<String, Button>();
+
+        monsterElement = new HashMap<String, PImage>();
+        monsterDeathElement = new HashMap<String, List<PImage>>();
+
+        towerElement = new HashMap<Integer, PImage>();
+
+        wavesList = new ArrayList<>();
 
         // set frame rate
         frameRate(FPS);
@@ -112,9 +124,9 @@ public class App extends PApplet {
             loadImage("src/main/resources/WizardTD/worm.png")
         ));
 
-        towerElement.put(1, loadImage("src/main/resources/WizardTD/tower0.png"));
-        towerElement.put(2, loadImage("src/main/resources/WizardTD/tower1.png"));
-        towerElement.put(3, loadImage("src/main/resources/WizardTD/tower2.png"));
+        towerElement.put(0, loadImage("src/main/resources/WizardTD/tower0.png"));
+        towerElement.put(1, loadImage("src/main/resources/WizardTD/tower1.png"));
+        towerElement.put(2, loadImage("src/main/resources/WizardTD/tower2.png"));
 
         bulletImage = loadImage("src/main/resources/WizardTD/fireball.png");
 
@@ -192,7 +204,7 @@ public class App extends PApplet {
      */
 	@Override
     public void keyPressed(){
-        if (gameInterface.isGameLost()){
+        if (gameInterface.isGameLost() || gameInterface.isGameWin()){
             if (key == 'r' || key == 'R'){
                 setup();
             }
@@ -228,6 +240,10 @@ public class App extends PApplet {
         if (buttonElement.get("T").isOn() && gameInterface.checkMousePosition(0, 40, 640, 640)) {
             gameInterface.buildNewTower();
         }
+
+        if ((buttonElement.get("U1").isOn() || buttonElement.get("U2").isOn() || buttonElement.get("U3").isOn()) && gameInterface.checkMousePosition(0, 40, 640, 640)) {
+            gameInterface.upgradeTower();
+        }
     }
 
 
@@ -248,7 +264,7 @@ public class App extends PApplet {
     public void draw() {
 
         gameInterface.drawMap();
-        gameInterface.drawTower();
+        gameInterface.drawTowerGameField();
         gameInterface.drawBackground();
 
         gameInterface.drawTimer();
@@ -256,6 +272,11 @@ public class App extends PApplet {
         gameInterface.drawMenu();
 
         gameInterface.drawMonster();
+        gameInterface.drawTowerInfo();
+
+        if (gameInterface.isGameWin()) {
+            gameInterface.drawGameWin();
+        }
 
         if (gameInterface.isGameLost()) {
             gameInterface.drawGameLost();

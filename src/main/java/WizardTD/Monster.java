@@ -56,7 +56,6 @@ public class Monster {
         this.dying = false;
         this.dyingCounter = 0;
         this.dead = false;
-
     }
 
 
@@ -256,13 +255,11 @@ public class Monster {
                 current = current.pointFrom;
             }
         }
-
     }
 
 
     public void move(float distance) {
         double limit = distance / 10;
-        // System.out.println(lastMove);
         if (currentPosition.pointNext != null) {
             if (firstMove || lastMove == 'n' || (Math.abs(x - currentPosition.pointNext.x) <= limit && Math.abs(y - currentPosition.pointNext.y) <= limit)) {
                 currentPosition = currentPosition.pointNext;
@@ -301,20 +298,10 @@ public class Monster {
                     }
                 }
             } else {
-                // System.out.println("what to do?");
-                // System.out.println(x);
-                // System.out.println(currentPosition.pointNext.x);
-                // System.out.println(y);
-                // System.out.println(currentPosition.pointNext.y);
-                // System.out.println(limit);
                 if ((int) Math.abs(x - currentPosition.pointNext.x) == 0) {
                     x = currentPosition.pointNext.x;
-                    // System.out.println("change x");
-                    // System.out.println(x);
                 } else if ((int) Math.abs(y - currentPosition.pointNext.y) == 0) {
                     y = currentPosition.pointNext.y;
-                    // System.out.println("change y");
-                    // System.out.println(y);
                 }
             }
         }
@@ -356,7 +343,6 @@ class Point {
     public void setNextPoint(Point point) {
         pointNext = point;
     }
-
 }
 
 
