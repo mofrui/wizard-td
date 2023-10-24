@@ -1,15 +1,6 @@
 package WizardTD;
 
-import processing.core.PApplet;
 import processing.core.PImage;
-import processing.data.JSONArray;
-import processing.data.JSONObject;
-import processing.event.MouseEvent;
-
-import java.awt.Graphics2D;
-import java.awt.geom.AffineTransform;
-import java.awt.image.BufferedImage;
-
 import java.io.*;
 import java.util.*;
 
@@ -34,6 +25,9 @@ public class Monster {
     private float y;
     private int xStart;
     private int yStart;
+
+    private char lastMove = ' ';
+    private boolean firstMove = true;
 
 
     public Monster(String type, PImage image, List<PImage> deathAnimation, int hp, double speed, double armour, int manaGainedOnKill, char[][] mapLayout) {
@@ -99,6 +93,11 @@ public class Monster {
 
     public List<PImage> getDeathAnimation() {
         return deathAnimation;
+    }
+
+
+    public float getHpPercentage() {
+        return ((int)currentHp * 29 / fullHp);
     }
 
 
@@ -205,20 +204,60 @@ public class Monster {
 
 
     public void move(float distance) {
+        double limit = distance / 10;
+        // System.out.println(lastMove);
         if (currentPosition.pointNext != null) {
-            if (Math.abs(x - currentPosition.pointNext.x) < 0.02 && Math.abs(y - currentPosition.pointNext.y) < 0.02) {
+            if (firstMove || lastMove == 'n' || (Math.abs(x - currentPosition.pointNext.x) <= limit && Math.abs(y - currentPosition.pointNext.y) <= limit)) {
                 currentPosition = currentPosition.pointNext;
-            } else if (Math.abs(x - currentPosition.pointNext.x) != 0 && Math.abs(y - currentPosition.pointNext.y) < 0.02) {
+                firstMove = false;
+                lastMove = ' ';
+            } else if (Math.abs(x - currentPosition.pointNext.x) != 0 && Math.abs(y - currentPosition.pointNext.y) <= limit) {
                 if (x > currentPosition.pointNext.x) {
                     x -= distance;
+                    if (lastMove == 'r') {
+                        lastMove = 'n';
+                    } else {
+                        lastMove = 'l';
+                    }
                 } else {
                     x += distance;
+                    if (lastMove == 'l') {
+                        lastMove = 'n';
+                    } else {
+                        lastMove = 'r';
+                    }
                 }
-            } else if (Math.abs(x - currentPosition.pointNext.x) < 0.02 && Math.abs(y - currentPosition.pointNext.y) != 0) {
+            } else if (Math.abs(x - currentPosition.pointNext.x) <= limit && Math.abs(y - currentPosition.pointNext.y) != 0) {
                 if (y > currentPosition.pointNext.y) {
                     y -= distance;
+                    if (lastMove == 'd') {
+                        lastMove = 'n';
+                    } else {
+                        lastMove = 'u';
+                    }
                 } else {
                     y += distance;
+                    if (lastMove == 'u') {
+                        lastMove = 'n';
+                    } else {
+                        lastMove = 'd';
+                    }
+                }
+            } else {
+                // System.out.println("what to do?");
+                // System.out.println(x);
+                // System.out.println(currentPosition.pointNext.x);
+                // System.out.println(y);
+                // System.out.println(currentPosition.pointNext.y);
+                // System.out.println(limit);
+                if ((int) Math.abs(x - currentPosition.pointNext.x) == 0) {
+                    x = currentPosition.pointNext.x;
+                    // System.out.println("change x");
+                    // System.out.println(x);
+                } else if ((int) Math.abs(y - currentPosition.pointNext.y) == 0) {
+                    y = currentPosition.pointNext.y;
+                    // System.out.println("change y");
+                    // System.out.println(y);
                 }
             }
         }

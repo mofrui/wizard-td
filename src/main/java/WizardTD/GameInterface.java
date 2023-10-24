@@ -35,6 +35,13 @@ public class GameInterface {
 
     private List<Monster> currentMonsterList;
 
+    private List<Tower> currentTowerList;
+    private HashMap<Integer, PImage> towerElement;
+    private int initialTowerRange;
+    private double initialTowerFiringSpeed;
+    private int initialTowerDamage;
+    private int towerCost;
+
     private boolean gameLost;
 
 
@@ -44,7 +51,12 @@ public class GameInterface {
         HashMap<String,PImage> mapElement,
         List<Wave> wavesList,
         Mana mana,
-        HashMap<String, Button> buttonElement) {
+        HashMap<String, Button> buttonElement,
+        HashMap<Integer, PImage> towerElement,
+        int initialTowerRange,
+        double initialTowerFiringSpeed,
+        int initialTowerDamage,
+        int towerCost) {
 
 		this.app = app;
 
@@ -60,6 +72,13 @@ public class GameInterface {
 		this.buttonElement = buttonElement;
 
         this.currentMonsterList = new ArrayList<Monster>();
+
+        this.currentTowerList = new ArrayList<Tower>();
+        this.towerElement = towerElement;
+        this.initialTowerRange = initialTowerRange;
+        this.initialTowerFiringSpeed = initialTowerFiringSpeed;
+        this.initialTowerDamage = initialTowerDamage;
+        this.towerCost = towerCost;
 
         this.gameLost = false;
 
@@ -314,13 +333,22 @@ public class GameInterface {
         
         if (currentMonsterList.size() > 0) {
             for (Monster monster : currentMonsterList) {
+                // draw monster image
                 app.image(monster.getImage(), monster.getPosition()[0], monster.getPosition()[1]);
+                
+                // draw hp bar
+                app.fill(255, 0, 0);
+                app.noStroke();
+                app.rect(monster.getPosition()[0] - 5, monster.getPosition()[1] - 7, 29, 3);
+                app.fill(0, 255, 0);
+                app.noStroke();
+                app.rect(monster.getPosition()[0] - 5, monster.getPosition()[1] - 7, monster.getHpPercentage(), 3);
+                
                 if (!buttonElement.get("P").isOn()) {
                     if (buttonElement.get("FF").isOn()) {
-                        monster.move((float)(2 * monster.getSpeed()/frameRate));
-                    } else {
-                        monster.move((float)(1 * monster.getSpeed()/frameRate));
+                        monster.move((float)(monster.getSpeed()/20));
                     }
+                    monster.move((float)(monster.getSpeed()/20));
                 }
                 if (monster.hasReachedWizardHouse()) {
                     mana.decreaseCurrentMana(monster.getCurrentHp());
@@ -341,7 +369,26 @@ public class GameInterface {
             }
         }
 
+    }
 
+
+    public void drawTower() {
+
+        if (currentTowerList.size() > 0) {
+            for (Tower tower : currentTowerList) {
+                app.image(tower.getImage(), tower.getPosition()[0], tower.getPosition()[1]);
+                
+                // draw tower range
+                if (tower.isOver(app.mouseX, app.mouseY)) {
+                    app.noFill();
+                    app.stroke(255, 255, 0);
+                    app.strokeWeight(2);
+                    app.ellipse(tower.getPosition()[0]+32/2, tower.getPosition()[1]+32/2, tower.getRange()*2, tower.getRange()*2);
+                    app.stroke(0, 0, 0);
+                    app.strokeWeight(1);
+                }
+            }
+        }
     }
 
 
@@ -356,6 +403,30 @@ public class GameInterface {
 
     public boolean isGameLost() {
         return gameLost;
+    }
+
+
+    public void buildNewTower() {
+
+        if (mana.getCurrentMana() - towerCost >= 0 && (mapLayout[(int)(app.mouseY-40)/32][(int)app.mouseX/32] == ' ')) {
+            if (currentTowerList.size() > 0) {
+                for (Tower tower : currentTowerList) {
+                    if (tower.isOver(app.mouseX, app.mouseY)) {
+                        return;
+                    }
+                }
+                Tower tower = new Tower(app.mouseX, app.mouseY, initialTowerRange, initialTowerFiringSpeed, initialTowerDamage, towerElement);
+                currentTowerList.add(tower);
+                mana.decreaseCurrentMana(towerCost);
+            } else {
+                Tower tower = new Tower(app.mouseX, app.mouseY, initialTowerRange, initialTowerFiringSpeed, initialTowerDamage, towerElement);
+                currentTowerList.add(tower);
+                mana.decreaseCurrentMana(towerCost);
+            }
+            
+        }
+        buttonElement.get("T").setButtonStatus(false);
+
     }
 
 }

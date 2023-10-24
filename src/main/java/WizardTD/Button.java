@@ -1,5 +1,9 @@
 package WizardTD;
 
+import processing.core.PImage;
+import java.io.*;
+import java.util.*;
+
 public class Button {
 
 	private String name;
@@ -61,6 +65,7 @@ public class Button {
     public boolean hasMouseOver() {
     	return mouseOver;
     }
+
 
     public boolean isOn() {
     	return status;

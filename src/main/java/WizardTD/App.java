@@ -35,9 +35,11 @@ public class App extends PApplet {
     // initialise all image resources for mapping
     private HashMap<String, PImage> mapElement = new HashMap<String , PImage>();
     private HashMap<String, Button> buttonElement = new HashMap<String, Button>();
+    
     private HashMap<String, PImage> monsterElement = new HashMap<String, PImage>();
     private HashMap<String, List<PImage>> monsterDeathElement = new HashMap<String, List<PImage>>();
-
+    
+    private HashMap<Integer, PImage> towerElement = new HashMap<Integer, PImage>();
 
     // stores waves objects
     private List<Wave> wavesList = new ArrayList<>();
@@ -101,15 +103,16 @@ public class App extends PApplet {
             loadImage("src/main/resources/WizardTD/gremlin4.png"),
             loadImage("src/main/resources/WizardTD/gremlin5.png")
         ));
-
         monsterDeathElement.put("beetle", Arrays.asList(
             loadImage("src/main/resources/WizardTD/beetle.png")
         ));
-
         monsterDeathElement.put("worm", Arrays.asList(
             loadImage("src/main/resources/WizardTD/worm.png")
         ));
 
+        towerElement.put(1, loadImage("src/main/resources/WizardTD/tower0.png"));
+        towerElement.put(2, loadImage("src/main/resources/WizardTD/tower1.png"));
+        towerElement.put(3, loadImage("src/main/resources/WizardTD/tower2.png"));
 
 
         JSONObject configFile = loadJSONObject(configPath);
@@ -177,7 +180,7 @@ public class App extends PApplet {
             wavesList.add(waveObj);
         }
 
-        gameInterface = new GameInterface(this, mapLayout, mapElement, wavesList, mana, buttonElement);
+        gameInterface = new GameInterface(this, mapLayout, mapElement, wavesList, mana, buttonElement, towerElement, initialTowerRange, initialTowerFiringSpeed, initialTowerDamage, towerCost);
 
     }
 
@@ -218,6 +221,10 @@ public class App extends PApplet {
                 button.updateStatus();
             }
         }
+
+        if (buttonElement.get("T").isOn() && gameInterface.checkMousePosition(0, 40, 640, 640)) {
+            gameInterface.buildNewTower();
+        }
     }
 
 
@@ -244,6 +251,7 @@ public class App extends PApplet {
         gameInterface.drawMenu();
 
         gameInterface.drawMonster();
+        gameInterface.drawTower();
 
         if (gameInterface.isGameLost()) {
             gameInterface.drawGameLost();
