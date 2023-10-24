@@ -22,6 +22,7 @@ public class GameInterface {
 
 	private char[][] mapLayout;
 	private HashMap<String,PImage> mapElement;
+    private int wizard_house_x = 0, wizard_house_y = 0;
 
 	private List<Wave> wavesList;
 	private Wave currentWave;
@@ -110,7 +111,6 @@ public class GameInterface {
 
 	public void drawMap() {
 
-        int wizard_house_x = 0, wizard_house_y = 0;
         // y and x here correspond with the x and y coordinate
         for (int y = 0; y < mapLayout.length; y += 1) {
             for (int x = 0; x < mapLayout[y].length; x += 1) {
@@ -184,8 +184,6 @@ public class GameInterface {
                 }
             }
         }
-        // load the wizard house at the end
-        app.image(mapElement.get("WIZARD_HOUSE"), wizard_house_x, wizard_house_y - 8);
 	}
 	
 
@@ -357,7 +355,7 @@ public class GameInterface {
                 }
                 if (monster.hasReachedWizardHouse()) {
                     mana.decreaseCurrentMana(monster.getCurrentHp());
-                    toRemove.add(monster);
+                    monster.banishMonster();
                 }
                 if (monster.isDead()) {
                     toRemove.add(monster);
@@ -424,25 +422,31 @@ public class GameInterface {
 
                 // draw bullet
                 if (currentMonsterList.size() > 0) {
-                    for (Monster monster : currentMonsterList) {
-                        float distance = app.dist(tower.getPosition()[0], tower.getPosition()[1], monster.getPosition()[0], monster.getPosition()[1]);
+                    Random random = new Random();
+                    int randomIndex = random.nextInt(currentMonsterList.size());
+                    Monster randomMonster = currentMonsterList.get(randomIndex);
+                    float distance = app.dist(tower.getPosition()[0], tower.getPosition()[1], randomMonster.getPosition()[0], randomMonster.getPosition()[1]);
+                    if (!buttonElement.get("P").isOn()) {
                         if (buttonElement.get("FF").isOn()) {
                             tower.updateFireCoolDown(2.0 / frameRate);
                         } else {
                             tower.updateFireCoolDown(1.0 / frameRate);
                         }
-                        if (distance < tower.getRange() && tower.isReadyToFire()) {
-                            tower.fire(monster);
-                        }
-                    }   
+                    }
+                    if (distance < tower.getRange() && tower.isReadyToFire()) {
+                        tower.fire(randomMonster);
+                    }
                 }
 
                 List<Bullet> toRemove = new ArrayList<>();
 
                 if (tower.getBulletList().size() > 0) {
                     for (Bullet bullet : tower.getBulletList()) {
-                        bullet.move(buttonElement.get("FF").isOn());
+                        if (!buttonElement.get("P").isOn()) {
+                            bullet.move(buttonElement.get("FF").isOn());
+                        }
                         bullet.makeDamage();
+                        bullet.checkTargetLost();
                         if (! bullet.isHide()) {
                             app.image(bullet.getImage(), bullet.getPosition()[0], bullet.getPosition()[1]);
                         } else {
@@ -459,12 +463,17 @@ public class GameInterface {
                         if (b == bulletToRemove) {
                             iterator.remove(); // Safely remove the monster
                             break;
+                        }
+                    }
                 }
-            }
-        }
 
             }
         }
+    }
+
+
+    public void drawWizardHouse() {
+        app.image(mapElement.get("WIZARD_HOUSE"), wizard_house_x, wizard_house_y - 8);
     }
 
 

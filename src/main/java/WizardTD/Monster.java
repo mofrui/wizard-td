@@ -20,6 +20,7 @@ public class Monster {
 
     private char[][] mapLayout;
 
+    private Point startPosition;
     private Point currentPosition;
     private float x;
     private float y;
@@ -145,10 +146,10 @@ public class Monster {
 
         // use modulo to randomly spawn a monster in random starting position
         Random random = new Random();
-        int randomSpawn = (random.nextInt(100) + 1) % spawnPositions.size();
-        x = spawnPositions.get(randomSpawn)[0];
+        int randomIndex = random.nextInt(spawnPositions.size());
+        x = spawnPositions.get(randomIndex)[0];
         xStart = (int)x;
-        y = spawnPositions.get(randomSpawn)[1];
+        y = spawnPositions.get(randomIndex)[1];
         yStart = (int)y;
     }
 
@@ -211,6 +212,7 @@ public class Monster {
                 if (current.pointFrom != null) {
                     current.pointFrom.setNextPoint(current);
                 } else {
+                    startPosition = current;
                     currentPosition = current;
                 }
                 // get the pointfrom
@@ -285,6 +287,14 @@ public class Monster {
     public boolean hasReachedWizardHouse() {
         return (currentPosition.pointNext == null);
     }
+
+
+    public void banishMonster() {
+        x = xStart;
+        y = yStart;
+        currentPosition = startPosition;
+    }
+
 }
 
 

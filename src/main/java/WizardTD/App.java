@@ -247,18 +247,21 @@ public class App extends PApplet {
 	@Override
     public void draw() {
 
-        gameInterface.drawBackground();
         gameInterface.drawMap();
+        gameInterface.drawTower();
+        gameInterface.drawBackground();
+
         gameInterface.drawTimer();
         gameInterface.drawMana();
         gameInterface.drawMenu();
 
         gameInterface.drawMonster();
-        gameInterface.drawTower();
 
         if (gameInterface.isGameLost()) {
             gameInterface.drawGameLost();
         }
+
+        gameInterface.drawWizardHouse();
 
     }
 

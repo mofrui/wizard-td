@@ -64,6 +64,13 @@ public class Bullet {
 	}
 
 
+	public void checkTargetLost() {
+		if (target.getCurrentHp() == 0) {
+			hide = true;
+		}
+	}
+
+
 	public PImage getImage() {
 		return image;
 	}
