@@ -19,6 +19,9 @@ public class GameInterface {
 	private final int frameRate = 60;
 
 	private PApplet app;
+    private boolean endless;
+
+    private HashMap<String,Button> menuButtons;
 
 	private char[][] mapLayout;
 	private HashMap<String,PImage> mapElement;
@@ -46,13 +49,18 @@ public class GameInterface {
     private PImage bulletImage;
 
     private boolean gameLost;
+    private boolean readyForNextRound = false;
 
 
 	public GameInterface(
         PApplet app,
+        boolean endless,
+        HashMap<String,Button> menuButtons,
         char[][] mapLayout,
         HashMap<String,PImage> mapElement,
         List<Wave> wavesList,
+        int lastWaveNumber,
+        int totalWaveNumberStreak,
         Mana mana,
         HashMap<String, Button> buttonElement,
         HashMap<Integer, PImage> towerElement,
@@ -64,13 +72,17 @@ public class GameInterface {
     ) {
 
 		this.app = app;
+        this.endless = endless;
+
+        this.menuButtons = menuButtons;
 
 		this.mapLayout = mapLayout;
 		this.mapElement = mapElement;
 
 		this.wavesList = wavesList;
-		currentWaveNumber = 0;
-		totalWaveNumber = wavesList.size();
+
+        this.currentWaveNumber = 0;
+        this.totalWaveNumber = wavesList.size();
 
         this.mana = mana;
 
@@ -94,6 +106,40 @@ public class GameInterface {
     // this method help to check whether the mouse is on a specific area or not
     public boolean checkMousePosition(int x, int y, int width, int height) {
         return app.mouseX >= x && app.mouseX <= x + width && app.mouseY >= y && app.mouseY <= y + height;
+    }
+
+
+    public void drawStartMenu() {
+
+        app.noStroke();
+        app.fill(137, 115, 76);
+        app.rect(0, 0, 760, 760);
+
+        app.fill(10, 0, 0);
+        app.textSize(50);
+        app.text("Wizard Tower Defence", 100, 280);
+
+        for (Map.Entry<String, Button> entry : menuButtons.entrySet()) {
+            Button button = entry.getValue();
+        
+            // set whether the mouse is over the button
+            button.updateMouseOver(checkMousePosition(button.getX(), button.getY(), 160, 50));
+    
+            if (button.isOn()) {
+                app.fill(255, 227, 132);
+            } else if (button.hasMouseOver()) {
+                app.fill(128,128,128);
+            } else {
+                app.noFill();
+            }
+            app.stroke(10, 0, 0);
+            app.strokeWeight(3);
+            app.rect(button.getX(), button.getY(), 160, 50);
+
+            app.fill(10, 0, 0);
+            app.textSize(20);
+            app.text(button.getName(), button.getX() + 30, button.getY() + 30);
+        }
     }
 
 
@@ -234,8 +280,16 @@ public class GameInterface {
 		if (nextWave != null) {
         	app.textSize(20);
         	app.fill(0, 0, 0);
-        	app.text("Wave " + nextWave.getWaveNumber() + " starts: " + (int)(currentWave.getRemainingTime() + nextWave.getRemainingPause()) , 15, 30);
-		}    
+            if (endless) {
+                app.text("Next wave starts: " + (int)(currentWave.getRemainingTime() + nextWave.getRemainingPause()) , 15, 30);
+            } else {
+                app.text("Wave " + nextWave.getWaveNumber() + " starts: " + (int)(currentWave.getRemainingTime() + nextWave.getRemainingPause()) , 15, 30);
+            }
+		} else {
+            if (endless) {
+                readyForNextRound = true;
+            }
+        } 
     }
 
 
@@ -629,14 +683,38 @@ public class GameInterface {
                             tower.upgradeTower('d');
                         }
                         mana.decreaseCurrentMana(upgradeCost);
+                    } else {
+                        buttonElement.get("U1").setButtonStatus(false);
+                        buttonElement.get("U2").setButtonStatus(false);
+                        buttonElement.get("U3").setButtonStatus(false);
                     }
                 }
             }
-        }
+        } 
+    }
 
-        buttonElement.get("U1").setButtonStatus(false);
-        buttonElement.get("U2").setButtonStatus(false);
-        buttonElement.get("U3").setButtonStatus(false);
+
+    public boolean isReadyForNextRound() {
+        return readyForNextRound;
+    }
+
+
+    public void updateReadyForNextRound() {
+        readyForNextRound = false;
+    }
+
+
+    public List<Wave> getWavesList() {
+        return wavesList;
+    }
+
+
+    public void updateEndlessInformation(List<Wave> updatedWavesList) {
+
+        wavesList = updatedWavesList;
+
+        currentWaveNumber = 0;
+        totalWaveNumber = wavesList.size();
     }
 }
 

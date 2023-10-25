@@ -48,8 +48,21 @@ public class App extends PApplet {
 
     private GameInterface gameInterface;
 
+    private boolean menuPage = true;
+    private HashMap<String, Button> menuButtons;
+
+    private boolean firstRun = true;
+    private boolean endless = false;
+    private boolean firstEndless = true;
+
+
     public App() {
-        this.configPath = "config.json";
+        this.configPath = "easy.json";
+
+        menuButtons = new HashMap<String, Button>();
+        menuButtons.put("easy", new Button("EASY GAME", "", 'e', 90, 360));
+        menuButtons.put("hard", new Button("HARD GAME", "", 'h', 300, 360));
+        menuButtons.put("endless", new Button("ENDLESS", "", 'x', 510, 360));
     }
 
     /**
@@ -67,76 +80,138 @@ public class App extends PApplet {
 	@Override
     public void setup() {
 
-        mapLayout = new char[20][20];
-        mapElement = new HashMap<String , PImage>();
-
-        buttonElement = new HashMap<String, Button>();
-
-        monsterElement = new HashMap<String, PImage>();
-        monsterDeathElement = new HashMap<String, List<PImage>>();
-
-        towerElement = new HashMap<Integer, PImage>();
-
-        wavesList = new ArrayList<>();
-
         // set frame rate
         frameRate(FPS);
 
-        // load images
-        mapElement.put("GRASS", loadImage("src/main/resources/WizardTD/grass.png"));
-        mapElement.put("PATH_HORIZONTAL", loadImage("src/main/resources/WizardTD/path0.png"));
-        mapElement.put("PATH_VERTICAL", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path0.png"), 90));
-        mapElement.put("PATH_TURN_RU", loadImage("src/main/resources/WizardTD/path1.png"));
-        mapElement.put("PATH_TURN_RD", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path1.png"), 90));
-        mapElement.put("PATH_TURN_LD", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path1.png"), 180));
-        mapElement.put("PATH_TURN_LU", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path1.png"), 270));
-        mapElement.put("PATH_T_DOWN", loadImage("src/main/resources/WizardTD/path2.png"));
-        mapElement.put("PATH_T_LEFT", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path2.png"), 90));
-        mapElement.put("PATH_T_UP", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path2.png"), 180));
-        mapElement.put("PATH_T_RIGHT", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path2.png"), 270));
-        mapElement.put("PATH_CROSS", loadImage("src/main/resources/WizardTD/path3.png"));
-        mapElement.put("SHRUB", loadImage("src/main/resources/WizardTD/shrub.png"));
-        mapElement.put("WIZARD_HOUSE", loadImage("src/main/resources/WizardTD/wizard_house.png"));
+        if (firstRun) {
+            mapElement = new HashMap<String , PImage>();
 
-        buttonElement.put("FF", new Button("FF", "2x speed", 'f', 645, 63));
-        buttonElement.put("P", new Button("P", "PAUSE", 'p', 645, 123));
-        buttonElement.put("T", new Button("T", "Build\ntower", 't', 645, 183));
-        buttonElement.put("U1", new Button("U1", "Upgrade\nrange", '1', 645, 243));
-        buttonElement.put("U2", new Button("U2", "Upgrade\nspeed", '2', 645, 303));
-        buttonElement.put("U3", new Button("U3", "Upgrade\ndamage", '3', 645, 363));
-        buttonElement.put("M", new Button("M", "Mana pool\ncost:", 'm', 645, 423));
+            buttonElement = new HashMap<String, Button>();
 
-        monsterElement.put("gremlin", loadImage("src/main/resources/WizardTD/gremlin.png"));
-        monsterElement.put("beetle", loadImage("src/main/resources/WizardTD/beetle.png"));
-        monsterElement.put("worm", loadImage("src/main/resources/WizardTD/worm.png"));
+            monsterElement = new HashMap<String, PImage>();
+            monsterDeathElement = new HashMap<String, List<PImage>>();
 
-        monsterDeathElement.put("gremlin", Arrays.asList(
-            loadImage("src/main/resources/WizardTD/gremlin1.png"),
-            loadImage("src/main/resources/WizardTD/gremlin2.png"),
-            loadImage("src/main/resources/WizardTD/gremlin3.png"),
-            loadImage("src/main/resources/WizardTD/gremlin4.png"),
-            loadImage("src/main/resources/WizardTD/gremlin5.png")
-        ));
-        monsterDeathElement.put("beetle", Arrays.asList(
-            loadImage("src/main/resources/WizardTD/gremlin1.png"),
-            loadImage("src/main/resources/WizardTD/gremlin2.png"),
-            loadImage("src/main/resources/WizardTD/gremlin3.png"),
-            loadImage("src/main/resources/WizardTD/gremlin4.png"),
-            loadImage("src/main/resources/WizardTD/gremlin5.png")
-        ));
-        monsterDeathElement.put("worm", Arrays.asList(
-            loadImage("src/main/resources/WizardTD/gremlin1.png"),
-            loadImage("src/main/resources/WizardTD/gremlin2.png"),
-            loadImage("src/main/resources/WizardTD/gremlin3.png"),
-            loadImage("src/main/resources/WizardTD/gremlin4.png"),
-            loadImage("src/main/resources/WizardTD/gremlin5.png")
-        ));
+            towerElement = new HashMap<Integer, PImage>();
 
-        towerElement.put(0, loadImage("src/main/resources/WizardTD/tower0.png"));
-        towerElement.put(1, loadImage("src/main/resources/WizardTD/tower1.png"));
-        towerElement.put(2, loadImage("src/main/resources/WizardTD/tower2.png"));
+            // load images
+            mapElement.put("GRASS", loadImage("src/main/resources/WizardTD/grass.png"));
+            mapElement.put("PATH_HORIZONTAL", loadImage("src/main/resources/WizardTD/path0.png"));
+            mapElement.put("PATH_VERTICAL", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path0.png"), 90));
+            mapElement.put("PATH_TURN_RU", loadImage("src/main/resources/WizardTD/path1.png"));
+            mapElement.put("PATH_TURN_RD", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path1.png"), 90));
+            mapElement.put("PATH_TURN_LD", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path1.png"), 180));
+            mapElement.put("PATH_TURN_LU", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path1.png"), 270));
+            mapElement.put("PATH_T_DOWN", loadImage("src/main/resources/WizardTD/path2.png"));
+            mapElement.put("PATH_T_LEFT", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path2.png"), 90));
+            mapElement.put("PATH_T_UP", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path2.png"), 180));
+            mapElement.put("PATH_T_RIGHT", rotateImageByDegrees(loadImage("src/main/resources/WizardTD/path2.png"), 270));
+            mapElement.put("PATH_CROSS", loadImage("src/main/resources/WizardTD/path3.png"));
+            mapElement.put("SHRUB", loadImage("src/main/resources/WizardTD/shrub.png"));
+            mapElement.put("WIZARD_HOUSE", loadImage("src/main/resources/WizardTD/wizard_house.png"));
 
-        bulletImage = loadImage("src/main/resources/WizardTD/fireball.png");
+            buttonElement.put("FF", new Button("FF", "2x speed", 'f', 645, 63));
+            buttonElement.put("P", new Button("P", "PAUSE", 'p', 645, 123));
+            buttonElement.put("T", new Button("T", "Build\ntower", 't', 645, 183));
+            buttonElement.put("U1", new Button("U1", "Upgrade\nrange", '1', 645, 243));
+            buttonElement.put("U2", new Button("U2", "Upgrade\nspeed", '2', 645, 303));
+            buttonElement.put("U3", new Button("U3", "Upgrade\ndamage", '3', 645, 363));
+            buttonElement.put("M", new Button("M", "Mana pool\ncost:", 'm', 645, 423));
+
+            monsterElement.put("gremlin", loadImage("src/main/resources/WizardTD/gremlin.png"));
+            monsterElement.put("beetle", loadImage("src/main/resources/WizardTD/beetle.png"));
+            monsterElement.put("worm", loadImage("src/main/resources/WizardTD/worm.png"));
+
+            monsterDeathElement.put("gremlin", Arrays.asList(
+                loadImage("src/main/resources/WizardTD/gremlin1.png"),
+                loadImage("src/main/resources/WizardTD/gremlin2.png"),
+                loadImage("src/main/resources/WizardTD/gremlin3.png"),
+                loadImage("src/main/resources/WizardTD/gremlin4.png"),
+                loadImage("src/main/resources/WizardTD/gremlin5.png")
+            ));
+            monsterDeathElement.put("beetle", Arrays.asList(
+                loadImage("src/main/resources/WizardTD/gremlin1.png"),
+                loadImage("src/main/resources/WizardTD/gremlin2.png"),
+                loadImage("src/main/resources/WizardTD/gremlin3.png"),
+                loadImage("src/main/resources/WizardTD/gremlin4.png"),
+                loadImage("src/main/resources/WizardTD/gremlin5.png")
+            ));
+            monsterDeathElement.put("worm", Arrays.asList(
+                loadImage("src/main/resources/WizardTD/gremlin1.png"),
+                loadImage("src/main/resources/WizardTD/gremlin2.png"),
+                loadImage("src/main/resources/WizardTD/gremlin3.png"),
+                loadImage("src/main/resources/WizardTD/gremlin4.png"),
+                loadImage("src/main/resources/WizardTD/gremlin5.png")
+            ));
+
+            towerElement.put(0, loadImage("src/main/resources/WizardTD/tower0.png"));
+            towerElement.put(1, loadImage("src/main/resources/WizardTD/tower1.png"));
+            towerElement.put(2, loadImage("src/main/resources/WizardTD/tower2.png"));
+
+            bulletImage = loadImage("src/main/resources/WizardTD/fireball.png");
+
+            firstRun = false;
+        }
+
+
+        if (menuButtons.get("endless").isOn() || endless) {
+            
+            endless = true;
+
+            if (firstEndless) {
+                
+                configPath = "endless.json";
+                menuPage = false;
+                firstEndless = false;
+            
+            } else {
+
+                List<Wave> newWavesList = new ArrayList<Wave>();
+
+                for (Wave wave : gameInterface.getWavesList()) {
+
+                    int waveNumber = wave.getWaveNumber() + 5;
+                    double duration = wave.getDuration() + 2;
+                    double preWavePause = wave.getPreWavePause() + 3;
+
+                    HashMap<Monster, Integer> newMonsterDict = new HashMap<Monster, Integer>();
+                    for (Monster monster : wave.getMonsterDict().keySet()) {
+
+                        Random random = new Random();
+
+                        String type = monster.getType();
+                        PImage image = monster.getImage();
+                        List<PImage> deathAnimation = monster.getDeathAnimation();
+                        int hp = (int)(monster.getFullHp() * 1.2);
+                        double speed = (random.nextInt(7) + 1) * 0.5;
+                        double armour = (random.nextInt(9) + 1) / 10.0;
+                        int manaGainedOnKill = monster.getManaGainedOnKill() + 10;
+
+                        int quantity = wave.getMonsterDict().get(monster) + 3;
+
+                        newMonsterDict.put(new Monster(type, image, deathAnimation, hp, speed, armour, manaGainedOnKill, mapLayout), quantity);    
+                    }
+
+                    newWavesList.add(new Wave(waveNumber, duration, preWavePause, newMonsterDict));
+                }
+
+                gameInterface.updateEndlessInformation(newWavesList);
+                return;
+            }
+
+        } else {
+            if (menuButtons.get("easy").isOn()) {
+                configPath = "easy.json";
+                menuPage = false;
+            } else if (menuButtons.get("hard").isOn()) {
+                configPath = "hard.json";
+                menuPage = false;
+            }
+
+        }
+
+        mapLayout = new char[20][20];
+        wavesList = new ArrayList<>();
+
 
         JSONObject configFile = loadJSONObject(configPath);
 
@@ -202,8 +277,18 @@ public class App extends PApplet {
             Wave wave = new Wave(waveNumber, duration, preWavePause, monsterDict);
             wavesList.add(wave);
         }
-
-        gameInterface = new GameInterface(this, mapLayout, mapElement, wavesList, mana, buttonElement, towerElement, initialTowerRange, initialTowerFiringSpeed, initialTowerDamage, towerCost, bulletImage);
+        
+        gameInterface = new GameInterface(this, endless, menuButtons, mapLayout, mapElement, wavesList, 0, 0, mana, buttonElement, towerElement, initialTowerRange, initialTowerFiringSpeed, initialTowerDamage, towerCost, bulletImage);
+        menuButtons.get("easy").setButtonStatus(false);
+        menuButtons.get("hard").setButtonStatus(false);
+        menuButtons.get("endless").setButtonStatus(false);
+        buttonElement.get("FF").setButtonStatus(false);
+        buttonElement.get("P").setButtonStatus(false);
+        buttonElement.get("T").setButtonStatus(false);
+        buttonElement.get("U1").setButtonStatus(false);
+        buttonElement.get("U2").setButtonStatus(false);
+        buttonElement.get("U3").setButtonStatus(false);
+        buttonElement.get("M").setButtonStatus(false);
 
     }
 
@@ -212,11 +297,24 @@ public class App extends PApplet {
      */
 	@Override
     public void keyPressed(){
-        if (gameInterface.isGameLost() || gameInterface.isGameWin()){
-            if (key == 'r' || key == 'R'){
+        if (gameInterface.isGameLost()){
+            if (key == 'r' || key == 'R') {
+                if (endless) {
+                    firstEndless = true;
+                }
+                setup();
+            } else if (key == 'b' || key == 'B') {
+                endless = false;
+                firstEndless = true;
+                menuPage = true;
                 setup();
             }
         }
+
+        if (gameInterface.isGameWin()) {
+            firstEndless = true;
+            menuPage = true;
+        } 
 
         for (Map.Entry<String, Button> entry : buttonElement.entrySet()) {
             Button button = entry.getValue();
@@ -236,6 +334,17 @@ public class App extends PApplet {
 
     @Override
     public void mousePressed(MouseEvent e) {
+
+        if (menuPage) {
+            for (Map.Entry<String, Button> entry : menuButtons.entrySet()) {
+                Button button = entry.getValue();
+                if (button.hasMouseOver()) {
+                    button.updateStatus();
+                    setup();
+                }
+            }
+        }
+
 
         for (Map.Entry<String, Button> entry : buttonElement.entrySet()) {
             Button button = entry.getValue();
@@ -271,26 +380,39 @@ public class App extends PApplet {
 	@Override
     public void draw() {
 
-        gameInterface.drawMap();
-        gameInterface.drawTowerGameField();
-        gameInterface.drawBackground();
+        if (menuPage) {
 
-        gameInterface.drawTimer();
-        gameInterface.drawMana();
-        gameInterface.drawMenu();
+            gameInterface.drawStartMenu();
 
-        gameInterface.drawMonster();
-        gameInterface.drawTowerInfo();
+        } else {
 
-        if (gameInterface.isGameWin()) {
-            gameInterface.drawGameWin();
+            gameInterface.drawMap();
+            gameInterface.drawTowerGameField();
+            gameInterface.drawBackground();
+
+            gameInterface.drawTimer();
+            gameInterface.drawMana();
+            gameInterface.drawMenu();
+
+            gameInterface.drawMonster();
+            gameInterface.drawTowerInfo();
+            gameInterface.drawWizardHouse();
+
+            if (gameInterface.isGameWin() && !endless) {
+                gameInterface.drawGameWin();
+            }
+
+            if (gameInterface.isGameLost()) {
+                gameInterface.drawGameLost();
+            }
+
+            if (endless && gameInterface.isReadyForNextRound()) {
+                gameInterface.updateReadyForNextRound();
+                setup();
+            }
+
+            
         }
-
-        if (gameInterface.isGameLost()) {
-            gameInterface.drawGameLost();
-        }
-
-        gameInterface.drawWizardHouse();
 
     }
 

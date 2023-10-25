@@ -70,6 +70,11 @@ public class Wave {
 	}
 
 
+	public HashMap<Monster, Integer> getMonsterDict() {
+		return monsterDict;
+	}
+
+
 	public void setStarted(boolean started) {
 		this.started = started;
 	}
@@ -100,23 +105,12 @@ public class Wave {
 	}
 
 
-	// public double getSpawnInterval(boolean fast) {
-	// 	if (fast) {
-	// 		return ((duration/2) / (totalMonsterQuantity-1));
-	// 	} else {
-	// 		return (duration / (totalMonsterQuantity-1));
-	// 	}
-	// 	return 
-	// }
-
-
 	public void updateSpawnInterval(double time) {
 		spawnInterval -= time;
 	}
 
 
 	public boolean isReadyToSpawn() {
-		System.out.println(spawnInterval);
 		if (spawnInterval <= 0) {
 			spawnInterval = duration / totalMonsterQuantity;
 			return true;
