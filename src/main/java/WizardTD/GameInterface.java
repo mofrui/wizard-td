@@ -576,29 +576,35 @@ public class GameInterface {
 
 
     public void drawGameLost() {
+        app.stroke(0, 0, 0);
+        app.strokeWeight(3);
+        app.fill(137, 115, 76);
+        app.rect(150, 230, 340, 200);
         app.fill(0, 0, 0);
-        app.rect(270, 270, 100, 100);
-        app.fill(0, 255, 0);
         app.textSize(30);
-        app.text("You LOST", 320, 320);
+        app.text("You LOST", 245, 310);
         app.textSize(20);
-        app.text("press 'r' to restart", 320, 360);
+        app.text("press 'r' to restart", 230, 340);
+        app.textSize(20);
+        app.text("press 'b' to return the menu", 180, 370);
     }
 
 
     public void drawGameWin() {
+        app.stroke(0, 0, 0);
+        app.strokeWeight(3);
+        app.fill(137, 115, 76);
+        app.rect(150, 230, 340, 200);
         app.fill(0, 0, 0);
-        app.rect(270, 270, 100, 100);
-        app.fill(0, 255, 0);
         app.textSize(30);
-        app.text("You WIN", 320, 320);
+        app.text("You WIN", 250, 310);
         app.textSize(20);
-        app.text("press 'r' to restart", 320, 360);
+        app.text("press any key to return the menu", 160, 340);
     }
 
 
     public boolean isGameWin() {
-        return (currentWaveNumber+1 == totalWaveNumber && (int)currentWave.getRemainingTime() == 0 && currentMonsterList.size() == 0);
+        return (nextWave == null && (int)currentWave.getRemainingTime() == 0 && currentMonsterList.size() == 0);
     }
 
 
