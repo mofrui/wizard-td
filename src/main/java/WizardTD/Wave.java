@@ -12,9 +12,10 @@ public class Wave {
 	private double preWavePause;
 
 	private HashMap<Monster, Integer> monsterDict;
-	private int totalMonsterQuantity;
+	private int totalMonsterQuantity = 0;
 
 	private boolean started;
+	private double spawnInterval;
 
 	// these attributes are used for countdown timers
 	private double remainingTime;
@@ -37,6 +38,8 @@ public class Wave {
 		} else {
 			started = false;
 		}
+		spawnInterval = 0;
+
 		remainingTime = duration;
 		remainingPause = preWavePause;
 	}
@@ -97,13 +100,28 @@ public class Wave {
 	}
 
 
-	public double getSpawnInterval(boolean fast) {
-		if (fast) {
-			return ((duration/2) / totalMonsterQuantity);
-		} else {
-			return (duration / totalMonsterQuantity);
+	// public double getSpawnInterval(boolean fast) {
+	// 	if (fast) {
+	// 		return ((duration/2) / (totalMonsterQuantity-1));
+	// 	} else {
+	// 		return (duration / (totalMonsterQuantity-1));
+	// 	}
+	// 	return 
+	// }
+
+
+	public void updateSpawnInterval(double time) {
+		spawnInterval -= time;
+	}
+
+
+	public boolean isReadyToSpawn() {
+		System.out.println(spawnInterval);
+		if (spawnInterval <= 0) {
+			spawnInterval = duration / totalMonsterQuantity;
+			return true;
 		}
-		
+		return false;
 	}
 
 

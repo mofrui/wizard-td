@@ -312,7 +312,12 @@ public class GameInterface {
 
         if (!buttonElement.get("P").isOn()) {
             // if the time passed is a multiple of the spawn time interval, then spawn a new monster
-            if ( ((currentWave.getDuration() - currentWave.getRemainingTime()) % currentWave.getSpawnInterval(buttonElement.get("FF").isOn())) < 0.04) {
+            if (buttonElement.get("FF").isOn()) {
+                currentWave.updateSpawnInterval(2.0 / frameRate);
+            } else {
+                currentWave.updateSpawnInterval(1.0 / frameRate);
+            }
+            if (currentWave.isReadyToSpawn()) {
                 if (currentWave.hasRemainingMonster()) {
                     Monster m = currentWave.getRandomMonster();
                     Monster monster = new Monster(
@@ -353,9 +358,9 @@ public class GameInterface {
                 } else {
                     if (!buttonElement.get("P").isOn()) {
                         if (buttonElement.get("FF").isOn()) {
-                            monster.move((float)(monster.getSpeed()/20));
+                            monster.move((float)(monster.getSpeed()/32));
                         }
-                        monster.move((float)(monster.getSpeed()/20));
+                        monster.move((float)(monster.getSpeed()/32));
                     }
                 }
                 

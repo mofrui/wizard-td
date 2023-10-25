@@ -118,10 +118,18 @@ public class App extends PApplet {
             loadImage("src/main/resources/WizardTD/gremlin5.png")
         ));
         monsterDeathElement.put("beetle", Arrays.asList(
-            loadImage("src/main/resources/WizardTD/beetle.png")
+            loadImage("src/main/resources/WizardTD/gremlin1.png"),
+            loadImage("src/main/resources/WizardTD/gremlin2.png"),
+            loadImage("src/main/resources/WizardTD/gremlin3.png"),
+            loadImage("src/main/resources/WizardTD/gremlin4.png"),
+            loadImage("src/main/resources/WizardTD/gremlin5.png")
         ));
         monsterDeathElement.put("worm", Arrays.asList(
-            loadImage("src/main/resources/WizardTD/worm.png")
+            loadImage("src/main/resources/WizardTD/gremlin1.png"),
+            loadImage("src/main/resources/WizardTD/gremlin2.png"),
+            loadImage("src/main/resources/WizardTD/gremlin3.png"),
+            loadImage("src/main/resources/WizardTD/gremlin4.png"),
+            loadImage("src/main/resources/WizardTD/gremlin5.png")
         ));
 
         towerElement.put(0, loadImage("src/main/resources/WizardTD/tower0.png"));

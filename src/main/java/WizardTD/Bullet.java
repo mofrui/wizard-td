@@ -15,6 +15,7 @@ public class Bullet {
 
 	private boolean hide;
 
+
 	public Bullet(float x, float y, int damage, Monster target, PImage image) {
 
 		this.x = x;
@@ -24,7 +25,6 @@ public class Bullet {
 		this.image = image;
 
 		this.hide = false;
-
 	}
 
 
@@ -47,8 +47,6 @@ public class Bullet {
             x += Math.cos(angle) * 5;
             y += Math.sin(angle) * 5;
         }
-
-
 	}
 
 
