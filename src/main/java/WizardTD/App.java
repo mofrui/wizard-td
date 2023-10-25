@@ -146,6 +146,11 @@ public class App extends PApplet {
             towerElement.put(0, loadImage("src/main/resources/WizardTD/tower0.png"));
             towerElement.put(1, loadImage("src/main/resources/WizardTD/tower1.png"));
             towerElement.put(2, loadImage("src/main/resources/WizardTD/tower2.png"));
+            towerElement.put(3, loadImage("src/main/resources/WizardTD/tower3.png"));
+            towerElement.put(4, loadImage("src/main/resources/WizardTD/tower4.png"));
+            towerElement.put(5, loadImage("src/main/resources/WizardTD/tower5.png"));
+            towerElement.put(6, loadImage("src/main/resources/WizardTD/tower6.png"));
+            towerElement.put(7, loadImage("src/main/resources/WizardTD/tower7.png"));
 
             bulletImage = loadImage("src/main/resources/WizardTD/fireball.png");
 

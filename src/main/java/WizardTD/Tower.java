@@ -70,13 +70,28 @@ public class Tower {
 
 
 	public void updateImage() {
-		if (rangeLevel >= 2 && speedLevel >= 2 && damageLevel >= 2) {
-            image = imageList.get(2);
-            allLevel = 2;
-        } else if (rangeLevel >= 1 && speedLevel >= 1 && damageLevel >= 1) {
-			image = imageList.get(1);
-			allLevel = 1;
-        }
+		if (rangeLevel >= 7 && speedLevel >= 7 && damageLevel >= 7) {
+		    image = imageList.get(7);
+		    allLevel = 7;
+		} else if (rangeLevel >= 6 && speedLevel >= 6 && damageLevel >= 6) {
+		    image = imageList.get(6);
+		    allLevel = 6;
+		} else if (rangeLevel >= 5 && speedLevel >= 5 && damageLevel >= 5) {
+		    image = imageList.get(5);
+		    allLevel = 5;
+		} else if (rangeLevel >= 4 && speedLevel >= 4 && damageLevel >= 4) {
+		    image = imageList.get(4);
+		    allLevel = 4;
+		} else if (rangeLevel >= 3 && speedLevel >= 3 && damageLevel >= 3) {
+		    image = imageList.get(3);
+		    allLevel = 3;
+		} else if (rangeLevel >= 2 && speedLevel >= 2 && damageLevel >= 2) {
+		    image = imageList.get(2);
+		    allLevel = 2;
+		} else if (rangeLevel >= 1 && speedLevel >= 1 && damageLevel >= 1) {
+		    image = imageList.get(1);
+		    allLevel = 1;
+		}
 	}
 
 
