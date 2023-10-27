@@ -188,8 +188,8 @@ public class App extends PApplet {
                 for (Wave wave : gameInterface.getWavesList()) {
 
                     int waveNumber = wave.getWaveNumber() + 5;
-                    double duration = wave.getDuration() + 2;
-                    double preWavePause = wave.getPreWavePause() + 3;
+                    double duration = wave.getDuration() + 1;
+                    double preWavePause = wave.getPreWavePause() + 1;
 
                     HashMap<Monster, Integer> newMonsterDict = new HashMap<Monster, Integer>();
                     for (Monster monster : wave.getMonsterDict().keySet()) {
@@ -199,12 +199,12 @@ public class App extends PApplet {
                         String type = monster.getType();
                         PImage image = monster.getImage();
                         List<PImage> deathAnimation = monster.getDeathAnimation();
-                        int hp = (int)(monster.getFullHp() * 1.2);
+                        int hp = (int)(monster.getFullHp() * 1.5);
                         double speed = monster.getSpeed();
-                        double armour = (random.nextInt(5) + 1) / 10.0;
-                        int manaGainedOnKill = monster.getManaGainedOnKill() + 10;
+                        double armour = monster.getArmour() / 1.1;
+                        int manaGainedOnKill = monster.getManaGainedOnKill() + 5;
 
-                        int quantity = wave.getMonsterDict().get(monster) + random.nextInt(9);
+                        int quantity = wave.getMonsterDict().get(monster) + random.nextInt(9) + 5;
 
                         newMonsterDict.put(new Monster(type, image, deathAnimation, hp, speed, armour, manaGainedOnKill, mapLayout), quantity);    
                     }

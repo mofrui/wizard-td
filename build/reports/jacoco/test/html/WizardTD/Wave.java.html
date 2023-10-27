@@ -1,0 +1,234 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Wave.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Wizard-Tower-Defence</a> &gt; <a href="index.source.html" class="el_package">WizardTD</a> &gt; <span class="el_source">Wave.java</span></div><h1>Wave.java</h1><pre class="source lang-java linenums">package WizardTD;
+
+import processing.core.PImage;
+import java.io.*;
+import java.util.*;
+
+
+/**
+ * The game will be process in different waves. Each waves is different in time and monsters.
+ * 
+ * @author Junrui Kang
+ * @version 1.0.0
+ */
+public class Wave {
+
+	private int waveNumber;
+	private double duration;
+	private double preWavePause;
+
+	private HashMap&lt;Monster, Integer&gt; originalMonsterDict;
+	private HashMap&lt;Monster, Integer&gt; monsterDict;
+<span class="nc" id="L22">	private int totalMonsterQuantity = 0;</span>
+
+	private boolean started;
+	private double spawnInterval;
+
+	// these attributes are used for countdown timers
+	private double remainingTime;
+	private double remainingPause;
+	
+
+<span class="nc" id="L32">	public Wave(int waveNumber, double duration, double preWavePause, HashMap&lt;Monster, Integer&gt; monsterDict) {</span>
+		
+<span class="nc" id="L34">		this.waveNumber = waveNumber;</span>
+<span class="nc" id="L35">		this.duration = duration;</span>
+<span class="nc" id="L36">		this.preWavePause = preWavePause;</span>
+
+<span class="nc" id="L38">		this.monsterDict = monsterDict;</span>
+<span class="nc" id="L39">		this.originalMonsterDict = monsterDict;</span>
+<span class="nc bnc" id="L40" title="All 2 branches missed.">		for (int value : monsterDict.values()) {</span>
+<span class="nc" id="L41">            this.totalMonsterQuantity += value;</span>
+<span class="nc" id="L42">        } </span>
+
+<span class="nc bnc" id="L44" title="All 2 branches missed.">		if (waveNumber == 1) {</span>
+<span class="nc" id="L45">			started = true; // the wave 1 will immediately start</span>
+		} else {
+<span class="nc" id="L47">			started = false;</span>
+		}
+<span class="nc" id="L49">		spawnInterval = 0;</span>
+
+<span class="nc" id="L51">		remainingTime = duration;</span>
+<span class="nc" id="L52">		remainingPause = preWavePause;</span>
+<span class="nc" id="L53">	}</span>
+
+	
+    /**
+     * Get the current wave number.
+     * 
+     * @return current wave number
+     */
+	public int getWaveNumber() {
+<span class="nc" id="L62">		return waveNumber;</span>
+	}
+
+
+    /**
+     * Get the duration of the wave.
+     * 
+     * @return duration of the wave
+     */
+	public double getDuration() {
+<span class="nc" id="L72">		return duration;</span>
+	}
+
+
+    /**
+     * Get the pre wave pause of the wave.
+     * 
+     * @return pre wave pause of the wave
+     */
+	public double getPreWavePause() {
+<span class="nc" id="L82">		return preWavePause;</span>
+	}
+
+
+    /**
+     * Get the remaining time of the wave.
+     * 
+     * @return remianing time of the wave
+     */
+	public double getRemainingTime() {
+<span class="nc" id="L92">		return remainingTime;</span>
+	}
+
+
+    /**
+     * Get the remaining pause of the wave.
+     * 
+     * @return remaining pause of the wave
+     */
+	public double getRemainingPause() {
+<span class="nc" id="L102">		return remainingPause;</span>
+	}
+
+
+    /**
+     * Get the monster dictionary of the wave, and used in updating new monster in endless mode.
+     * 
+     * @return monster dictionary of the wave
+     */
+	public HashMap&lt;Monster, Integer&gt; getMonsterDict() {
+<span class="nc" id="L112">		return originalMonsterDict;</span>
+	}
+
+
+    /**
+     * Set the starting status.
+     * 
+     * @param started starting status
+     */
+	public void setStarted(boolean started) {
+<span class="nc" id="L122">		this.started = started;</span>
+<span class="nc" id="L123">	}</span>
+
+
+    /**
+     * Reduce the remaining time by a given time.
+     * 
+     * @param time time to reduce the remaining time
+     */
+	public void updateRemainingTime(double time) {
+<span class="nc" id="L132">		this.remainingTime = time;</span>
+<span class="nc" id="L133">	}</span>
+
+
+    /**
+     * Reduce the remaining pause by a given time.
+     * 
+     * @param pause time to reduce the remaining pause
+     */
+	public void updateRemainingPause(double pause) {
+<span class="nc" id="L142">		this.remainingPause = pause;</span>
+<span class="nc" id="L143">	}</span>
+
+
+    /**
+     * Check whether the wave has started (to spawn monster).
+     * 
+     * @return whether the wave has started
+     */
+	public boolean hasStarted() {
+<span class="nc" id="L152">		return started;</span>
+	}
+
+
+    /**
+     * Check whether the wave has finished to spawn monster).
+     * 
+     * @return whether the wave has finished
+     */
+	public boolean hasFinishedSpawning() {
+<span class="nc bnc" id="L162" title="All 2 branches missed.">		return (remainingTime &lt;= 0);</span>
+	}
+
+
+    /**
+     * Check whether the wave has finished pausing time
+     * 
+     * @return whether the wave has finished pausing time
+     */
+	public boolean hasFinishedPausing() {
+<span class="nc bnc" id="L172" title="All 2 branches missed.">		return (remainingPause &lt;= 0);</span>
+	}
+
+
+    /**
+     * Reduce the spawn interval by a given time.
+     * 
+     * @param time time to reduce the spawn interval
+     */
+	public void updateSpawnInterval(double time) {
+<span class="nc" id="L182">		spawnInterval -= time;</span>
+<span class="nc" id="L183">	}</span>
+
+
+    /**
+     * Check whether the wave is ready to spawn a new monster
+     * 
+     * @return whether the wave is ready to spawn a new monster
+     */
+	public boolean isReadyToSpawn() {
+<span class="nc bnc" id="L192" title="All 2 branches missed.">		if (spawnInterval &lt;= 0) {</span>
+<span class="nc" id="L193">			spawnInterval = duration / totalMonsterQuantity;</span>
+<span class="nc" id="L194">			return true;</span>
+		}
+<span class="nc" id="L196">		return false;</span>
+	}
+
+
+    /**
+     * Get a random monster from the monster list to spawn, and decrease the monster list number.
+     * 
+     * @return a random monster
+     */
+	public Monster getRandomMonster() {
+<span class="nc" id="L206">    	Random random = new Random();</span>
+    	while (true) {
+<span class="nc" id="L208">    		int randomIndex = random.nextInt(monsterDict.size());</span>
+<span class="nc" id="L209">	    	Monster[] keys = monsterDict.keySet().toArray(new Monster[0]);</span>
+<span class="nc" id="L210">	    	Monster randomKey = keys[randomIndex];</span>
+<span class="nc bnc" id="L211" title="All 4 branches missed.">	    	if (monsterDict.containsKey(randomKey) &amp;&amp; monsterDict.get(randomKey) &gt; 0) {</span>
+<span class="nc" id="L212">	    		int updatedValue = monsterDict.get(randomKey) - 1;</span>
+<span class="nc" id="L213">	            monsterDict.put(randomKey, updatedValue);</span>
+<span class="nc" id="L214">	            return randomKey;</span>
+	    	}
+<span class="nc" id="L216">    	}</span>
+    }
+
+
+   /**
+     * Check whether this wave still has monster that has not been spawned.
+     * 
+     * @return whether this wave still has monster that has not been spawned
+     */
+    public boolean hasRemainingMonster() {
+<span class="nc" id="L226">    	int remainingQuantity = 0;</span>
+<span class="nc bnc" id="L227" title="All 2 branches missed.">		for (int value : monsterDict.values()) {</span>
+<span class="nc" id="L228">            remainingQuantity += value;</span>
+<span class="nc" id="L229">        } </span>
+<span class="nc bnc" id="L230" title="All 2 branches missed.">        return (remainingQuantity &gt; 0);</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

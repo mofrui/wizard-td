@@ -1,0 +1,268 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Tower.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Wizard-Tower-Defence</a> &gt; <a href="index.source.html" class="el_package">WizardTD</a> &gt; <span class="el_source">Tower.java</span></div><h1>Tower.java</h1><pre class="source lang-java linenums">package WizardTD;
+
+import processing.core.PImage;
+import java.io.*;
+import java.util.*;
+
+
+/**
+ * Tower has the ability to attack monster using its bullet.
+ * 
+ * @author Junrui Kang
+ * @version 1.0.0
+ */
+public class Tower {
+
+	private int x;
+	private int y;
+
+	private int range;
+	private int rangeLevel;
+
+	private double speed;
+	private int speedLevel;
+
+	private int damage;
+	private int damageLevel;
+	private int initialDamage;
+
+	private int allLevel;
+
+	private PImage image;
+	private HashMap&lt;Integer, PImage&gt; imageList;
+	private PImage bulletImage;
+
+	private List&lt;Bullet&gt; bulletList;
+
+	private double fireCoolDown;
+
+
+<span class="nc" id="L40">	public Tower(float xPos, float yPos, int range, double speed, int damage, HashMap&lt;Integer, PImage&gt; imageList, PImage bulletImage) {</span>
+
+<span class="nc" id="L42">		setPosition(xPos, yPos);</span>
+
+<span class="nc" id="L44">		this.range = range;</span>
+<span class="nc" id="L45">		this.rangeLevel = 0;</span>
+
+<span class="nc" id="L47">		this.speed = speed;</span>
+<span class="nc" id="L48">		this.speedLevel = 0;</span>
+
+<span class="nc" id="L50">		this.damage = damage;</span>
+<span class="nc" id="L51">		this.damageLevel = 0;</span>
+<span class="nc" id="L52">		this.initialDamage = damage;</span>
+
+<span class="nc" id="L54">		this.allLevel = 0;</span>
+
+<span class="nc" id="L56">		this.imageList = imageList;</span>
+<span class="nc" id="L57">		this.image = imageList.get(0);</span>
+<span class="nc" id="L58">		this.bulletImage = bulletImage;</span>
+
+<span class="nc" id="L60">		this.bulletList = new ArrayList&lt;Bullet&gt;();</span>
+
+<span class="nc" id="L62">		this.fireCoolDown = 0;</span>
+
+<span class="nc" id="L64">	}</span>
+
+
+	/**
+	 * Set the position of the tower based on the mouse position.
+	 * 
+	 * @param xPos the pixel coordinate for x
+	 * @param yPos the pixel coordinate for y
+	 */
+	public void setPosition(float xPos, float yPos) {
+<span class="nc" id="L74">		x = (int) xPos/32;</span>
+<span class="nc" id="L75">		y = (int) (yPos-40)/32;</span>
+<span class="nc" id="L76">	}</span>
+
+
+    /**
+     * Get the image of the tower.
+     * 
+     * @return tower image
+     */
+	public PImage getImage() {
+<span class="nc" id="L85">		return image;</span>
+	}
+
+
+    /**
+     * Update the image of the tower based on the upgrade level.
+     */
+	public void updateImage() {
+<span class="nc bnc" id="L93" title="All 6 branches missed.">		if (rangeLevel &gt;= 7 &amp;&amp; speedLevel &gt;= 7 &amp;&amp; damageLevel &gt;= 7) {</span>
+<span class="nc" id="L94">		    image = imageList.get(7);</span>
+<span class="nc" id="L95">		    allLevel = 7;</span>
+<span class="nc bnc" id="L96" title="All 6 branches missed.">		} else if (rangeLevel &gt;= 6 &amp;&amp; speedLevel &gt;= 6 &amp;&amp; damageLevel &gt;= 6) {</span>
+<span class="nc" id="L97">		    image = imageList.get(6);</span>
+<span class="nc" id="L98">		    allLevel = 6;</span>
+<span class="nc bnc" id="L99" title="All 6 branches missed.">		} else if (rangeLevel &gt;= 5 &amp;&amp; speedLevel &gt;= 5 &amp;&amp; damageLevel &gt;= 5) {</span>
+<span class="nc" id="L100">		    image = imageList.get(5);</span>
+<span class="nc" id="L101">		    allLevel = 5;</span>
+<span class="nc bnc" id="L102" title="All 6 branches missed.">		} else if (rangeLevel &gt;= 4 &amp;&amp; speedLevel &gt;= 4 &amp;&amp; damageLevel &gt;= 4) {</span>
+<span class="nc" id="L103">		    image = imageList.get(4);</span>
+<span class="nc" id="L104">		    allLevel = 4;</span>
+<span class="nc bnc" id="L105" title="All 6 branches missed.">		} else if (rangeLevel &gt;= 3 &amp;&amp; speedLevel &gt;= 3 &amp;&amp; damageLevel &gt;= 3) {</span>
+<span class="nc" id="L106">		    image = imageList.get(3);</span>
+<span class="nc" id="L107">		    allLevel = 3;</span>
+<span class="nc bnc" id="L108" title="All 6 branches missed.">		} else if (rangeLevel &gt;= 2 &amp;&amp; speedLevel &gt;= 2 &amp;&amp; damageLevel &gt;= 2) {</span>
+<span class="nc" id="L109">		    image = imageList.get(2);</span>
+<span class="nc" id="L110">		    allLevel = 2;</span>
+<span class="nc bnc" id="L111" title="All 6 branches missed.">		} else if (rangeLevel &gt;= 1 &amp;&amp; speedLevel &gt;= 1 &amp;&amp; damageLevel &gt;= 1) {</span>
+<span class="nc" id="L112">		    image = imageList.get(1);</span>
+<span class="nc" id="L113">		    allLevel = 1;</span>
+		}
+<span class="nc" id="L115">	}</span>
+
+
+    /**
+     * Get the position of the tower.
+     * 
+     * @return tower position in {x,y}
+     */
+	public float[] getPosition() {
+<span class="nc" id="L124">        return new float[]{x * 32, y * 32 + 40};</span>
+    }
+
+
+    /**
+     * Check whether the given position is the same as this tower.
+     * 
+	 * @param xPos the pixel coordinate for x
+	 * @param yPos the pixel coordinate for y
+     * @return whether the given position is the same as this tower
+     */
+    public boolean isOver(float xPos, float yPos) {
+<span class="nc bnc" id="L136" title="All 4 branches missed.">    	return ((x == (int)(xPos/32)) &amp;&amp; (y == (int)((yPos-40)/32)));</span>
+    }
+
+
+    /**
+     * Get the range of the tower.
+     * 
+     * @return tower range
+     */
+    public int getRange() {
+<span class="nc" id="L146">    	return range;</span>
+    }
+
+
+    /**
+     * Get the upgrade cost of a specific level of the tower.
+     * 
+     * @param toUpgrade the specific upgrade part (range, speed, damage)
+     * @return upgrade cost
+     */
+    public int getUpgradeCost(char toUpgrade) {
+
+<span class="nc" id="L158">    	int cost = 0;</span>
+
+<span class="nc bnc" id="L160" title="All 4 branches missed.">    	switch (toUpgrade) {</span>
+        case 'r':
+<span class="nc" id="L162">            cost = (20 + rangeLevel * 10);</span>
+<span class="nc" id="L163">            break;</span>
+        case 's':
+<span class="nc" id="L165">            cost = (20 + speedLevel * 10);</span>
+<span class="nc" id="L166">            break;</span>
+        case 'd':
+<span class="nc" id="L168">            cost = (20 + damageLevel * 10);</span>
+            break;
+    	}
+
+<span class="nc" id="L172">    	return cost;</span>
+    }
+
+
+    /**
+     * Upgrade the tower (range, speed, damage)
+     * 
+     * @param toUpgrade the specific upgrade part (range, speed, damage)
+     */
+    public void upgradeTower(char toUpgrade) {
+<span class="nc bnc" id="L182" title="All 4 branches missed.">    	switch (toUpgrade) {</span>
+        case 'r':
+<span class="nc" id="L184">        	rangeLevel += 1;</span>
+<span class="nc" id="L185">        	range += 32;</span>
+<span class="nc" id="L186">            break;</span>
+        case 's':
+<span class="nc" id="L188">            speedLevel += 1;</span>
+<span class="nc" id="L189">        	speed += 0.5;</span>
+<span class="nc" id="L190">            break;</span>
+        case 'd':
+<span class="nc" id="L192">            damageLevel += 1;</span>
+<span class="nc" id="L193">        	damage += (0.5 * initialDamage);</span>
+            break;
+		}
+<span class="nc" id="L196">    }</span>
+
+
+    /**
+     * Get the tower upgrade level (range, speed, damage)
+     * 
+     * @param toCheck the specific upgrade part (range, speed, damage)
+     * @return the corresponding level
+     */
+    public int getUpgradeLevel(char toCheck) {
+<span class="nc" id="L206">    	int level = 0;</span>
+
+<span class="nc bnc" id="L208" title="All 4 branches missed.">    	switch (toCheck) {</span>
+        case 'r':
+<span class="nc" id="L210">            level = rangeLevel - allLevel;</span>
+<span class="nc" id="L211">            break;</span>
+        case 's':
+<span class="nc" id="L213">            level = speedLevel - allLevel;</span>
+<span class="nc" id="L214">            break;</span>
+        case 'd':
+<span class="nc" id="L216">            level = damageLevel - allLevel;</span>
+            break;
+    	}
+
+<span class="nc" id="L220">    	return level;</span>
+    }
+
+
+    /**
+     * The tower will fire a bullet to the given target.
+     * 
+     * A bullet object will be instantiated here.
+     * 
+     * @param target monster to attack
+     */
+    public void fire(Monster target) {
+<span class="nc" id="L232">    	Bullet bullet = new Bullet(this.getPosition()[0], this.getPosition()[1], damage, target, bulletImage);</span>
+<span class="nc" id="L233">    	bulletList.add(bullet);</span>
+<span class="nc" id="L234">    	fireCoolDown = 1/speed;</span>
+<span class="nc" id="L235">    }</span>
+
+
+    /**
+     * Reduce the fire cooldown by a given time.
+     * 
+     * @param time time to reduce the fire cooldown
+     */
+    public void updateFireCoolDown(double time) {
+<span class="nc" id="L244">    	fireCoolDown -= time;</span>
+<span class="nc" id="L245">    }</span>
+
+
+    /**
+     * Check whether the fire cooldown is 0.
+     * 
+     * @return whether the tower is ready to fire
+     */
+    public boolean isReadyToFire() {
+<span class="nc bnc" id="L254" title="All 2 branches missed.">    	return (fireCoolDown &lt;= 0);</span>
+    }
+
+
+    /**
+     * Get the current bullet list of the tower for the game to draw.
+     * 
+     * @return bullet list
+     */
+    public List&lt;Bullet&gt; getBulletList() {
+<span class="nc" id="L264">    	return bulletList;</span>
+    }
+
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

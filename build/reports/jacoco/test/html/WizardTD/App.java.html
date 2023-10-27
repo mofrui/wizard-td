@@ -1,0 +1,481 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>App.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Wizard-Tower-Defence</a> &gt; <a href="index.source.html" class="el_package">WizardTD</a> &gt; <span class="el_source">App.java</span></div><h1>App.java</h1><pre class="source lang-java linenums">package WizardTD;
+
+import processing.core.PApplet;
+import processing.core.PImage;
+import processing.data.JSONArray;
+import processing.data.JSONObject;
+import processing.event.MouseEvent;
+
+import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
+
+import java.io.*;
+import java.util.*;
+
+
+/**
+ * App class is the main class that contains all critical methods to build the game.
+ * 
+ * Methods in this class setup game, draw gameboard and detect user i/o from mouse and keyboard.
+ * 
+ * @author Junrui Kang
+ * @version 1.0.0
+ */
+public class App extends PApplet {
+
+    public static final int CELLSIZE = 32;
+    public static final int SIDEBAR = 120;
+    public static final int TOPBAR = 40;
+    public static final int BOARD_WIDTH = 20;
+
+<span class="fc" id="L32">    public static int WIDTH = CELLSIZE*BOARD_WIDTH+SIDEBAR;</span>
+<span class="fc" id="L33">    public static int HEIGHT = BOARD_WIDTH*CELLSIZE+TOPBAR;</span>
+
+    public static final int FPS = 60;
+
+    public String configPath;
+
+<span class="fc" id="L39">    public Random random = new Random();</span>
+
+    private char[][] mapLayout;
+
+    // initialise all image resources for mapping
+    private HashMap&lt;String, PImage&gt; mapElement;
+    private HashMap&lt;String, Button&gt; buttonElement;
+    
+    private HashMap&lt;String, PImage&gt; monsterElement;
+    private HashMap&lt;String, List&lt;PImage&gt;&gt; monsterDeathElement;
+    
+    private HashMap&lt;Integer, PImage&gt; towerElement;
+
+    // stores waves objects
+    private List&lt;Wave&gt; wavesList;
+
+    private PImage bulletImage;
+
+    private GameInterface gameInterface;
+
+<span class="fc" id="L59">    private boolean menuPage = true;</span>
+    private HashMap&lt;String, Button&gt; menuButtons;
+
+<span class="fc" id="L62">    private boolean firstRun = true;</span>
+<span class="fc" id="L63">    private boolean endless = false;</span>
+<span class="fc" id="L64">    private boolean firstEndless = true;</span>
+
+
+    /**
+     * Set up a configuration file path when the app is launched.
+     */
+<span class="fc" id="L70">    public App() {</span>
+<span class="fc" id="L71">        this.configPath = &quot;easy.json&quot;;</span>
+<span class="fc" id="L72">    }</span>
+
+    /**
+     * Initialise the setting of the window size.
+     */
+	@Override
+    public void settings() {
+<span class="nc" id="L79">        size(WIDTH, HEIGHT);</span>
+<span class="nc" id="L80">    }</span>
+
+    /**
+     * Load all resources such as images.
+     * Initialise the elements such as the player, enemies and map elements.
+     * Instantiate game interface.
+     */
+	@Override
+    public void setup() {
+
+        // set frame rate
+<span class="nc" id="L91">        frameRate(FPS);</span>
+
+<span class="nc bnc" id="L93" title="All 2 branches missed.">        if (firstRun) {</span>
+
+<span class="nc" id="L95">            mapElement = new HashMap&lt;String , PImage&gt;();</span>
+
+<span class="nc" id="L97">            buttonElement = new HashMap&lt;String, Button&gt;();</span>
+
+<span class="nc" id="L99">            monsterElement = new HashMap&lt;String, PImage&gt;();</span>
+<span class="nc" id="L100">            monsterDeathElement = new HashMap&lt;String, List&lt;PImage&gt;&gt;();</span>
+
+<span class="nc" id="L102">            towerElement = new HashMap&lt;Integer, PImage&gt;();</span>
+
+<span class="nc" id="L104">            menuButtons = new HashMap&lt;String, Button&gt;();</span>
+<span class="nc" id="L105">            menuButtons.put(&quot;easy&quot;, new Button(&quot;EASY GAME&quot;, &quot;&quot;, 'e', 90, 360));</span>
+<span class="nc" id="L106">            menuButtons.put(&quot;hard&quot;, new Button(&quot;HARD GAME&quot;, &quot;&quot;, 'h', 300, 360));</span>
+<span class="nc" id="L107">            menuButtons.put(&quot;endless&quot;, new Button(&quot;ENDLESS&quot;, &quot;&quot;, 'x', 510, 360));</span>
+
+            // load images
+<span class="nc" id="L110">            mapElement.put(&quot;GRASS&quot;, loadImage(&quot;src/main/resources/WizardTD/grass.png&quot;));</span>
+<span class="nc" id="L111">            mapElement.put(&quot;PATH_HORIZONTAL&quot;, loadImage(&quot;src/main/resources/WizardTD/path0.png&quot;));</span>
+<span class="nc" id="L112">            mapElement.put(&quot;PATH_VERTICAL&quot;, rotateImageByDegrees(loadImage(&quot;src/main/resources/WizardTD/path0.png&quot;), 90));</span>
+<span class="nc" id="L113">            mapElement.put(&quot;PATH_TURN_RU&quot;, loadImage(&quot;src/main/resources/WizardTD/path1.png&quot;));</span>
+<span class="nc" id="L114">            mapElement.put(&quot;PATH_TURN_RD&quot;, rotateImageByDegrees(loadImage(&quot;src/main/resources/WizardTD/path1.png&quot;), 90));</span>
+<span class="nc" id="L115">            mapElement.put(&quot;PATH_TURN_LD&quot;, rotateImageByDegrees(loadImage(&quot;src/main/resources/WizardTD/path1.png&quot;), 180));</span>
+<span class="nc" id="L116">            mapElement.put(&quot;PATH_TURN_LU&quot;, rotateImageByDegrees(loadImage(&quot;src/main/resources/WizardTD/path1.png&quot;), 270));</span>
+<span class="nc" id="L117">            mapElement.put(&quot;PATH_T_DOWN&quot;, loadImage(&quot;src/main/resources/WizardTD/path2.png&quot;));</span>
+<span class="nc" id="L118">            mapElement.put(&quot;PATH_T_LEFT&quot;, rotateImageByDegrees(loadImage(&quot;src/main/resources/WizardTD/path2.png&quot;), 90));</span>
+<span class="nc" id="L119">            mapElement.put(&quot;PATH_T_UP&quot;, rotateImageByDegrees(loadImage(&quot;src/main/resources/WizardTD/path2.png&quot;), 180));</span>
+<span class="nc" id="L120">            mapElement.put(&quot;PATH_T_RIGHT&quot;, rotateImageByDegrees(loadImage(&quot;src/main/resources/WizardTD/path2.png&quot;), 270));</span>
+<span class="nc" id="L121">            mapElement.put(&quot;PATH_CROSS&quot;, loadImage(&quot;src/main/resources/WizardTD/path3.png&quot;));</span>
+<span class="nc" id="L122">            mapElement.put(&quot;SHRUB&quot;, loadImage(&quot;src/main/resources/WizardTD/shrub.png&quot;));</span>
+<span class="nc" id="L123">            mapElement.put(&quot;WIZARD_HOUSE&quot;, loadImage(&quot;src/main/resources/WizardTD/wizard_house.png&quot;));</span>
+
+<span class="nc" id="L125">            buttonElement.put(&quot;FF&quot;, new Button(&quot;FF&quot;, &quot;2x speed&quot;, 'f', 645, 63));</span>
+<span class="nc" id="L126">            buttonElement.put(&quot;P&quot;, new Button(&quot;P&quot;, &quot;PAUSE&quot;, 'p', 645, 123));</span>
+<span class="nc" id="L127">            buttonElement.put(&quot;T&quot;, new Button(&quot;T&quot;, &quot;Build\ntower&quot;, 't', 645, 183));</span>
+<span class="nc" id="L128">            buttonElement.put(&quot;U1&quot;, new Button(&quot;U1&quot;, &quot;Upgrade\nrange&quot;, '1', 645, 243));</span>
+<span class="nc" id="L129">            buttonElement.put(&quot;U2&quot;, new Button(&quot;U2&quot;, &quot;Upgrade\nspeed&quot;, '2', 645, 303));</span>
+<span class="nc" id="L130">            buttonElement.put(&quot;U3&quot;, new Button(&quot;U3&quot;, &quot;Upgrade\ndamage&quot;, '3', 645, 363));</span>
+<span class="nc" id="L131">            buttonElement.put(&quot;M&quot;, new Button(&quot;M&quot;, &quot;Mana pool\ncost:&quot;, 'm', 645, 423));</span>
+
+<span class="nc" id="L133">            monsterElement.put(&quot;gremlin&quot;, loadImage(&quot;src/main/resources/WizardTD/gremlin.png&quot;));</span>
+<span class="nc" id="L134">            monsterElement.put(&quot;beetle&quot;, loadImage(&quot;src/main/resources/WizardTD/beetle.png&quot;));</span>
+<span class="nc" id="L135">            monsterElement.put(&quot;worm&quot;, loadImage(&quot;src/main/resources/WizardTD/worm.png&quot;));</span>
+
+<span class="nc" id="L137">            monsterDeathElement.put(&quot;gremlin&quot;, Arrays.asList(</span>
+<span class="nc" id="L138">                loadImage(&quot;src/main/resources/WizardTD/gremlin1.png&quot;),</span>
+<span class="nc" id="L139">                loadImage(&quot;src/main/resources/WizardTD/gremlin2.png&quot;),</span>
+<span class="nc" id="L140">                loadImage(&quot;src/main/resources/WizardTD/gremlin3.png&quot;),</span>
+<span class="nc" id="L141">                loadImage(&quot;src/main/resources/WizardTD/gremlin4.png&quot;),</span>
+<span class="nc" id="L142">                loadImage(&quot;src/main/resources/WizardTD/gremlin5.png&quot;)</span>
+            ));
+<span class="nc" id="L144">            monsterDeathElement.put(&quot;beetle&quot;, Arrays.asList(</span>
+<span class="nc" id="L145">                loadImage(&quot;src/main/resources/WizardTD/gremlin1.png&quot;),</span>
+<span class="nc" id="L146">                loadImage(&quot;src/main/resources/WizardTD/gremlin2.png&quot;),</span>
+<span class="nc" id="L147">                loadImage(&quot;src/main/resources/WizardTD/gremlin3.png&quot;),</span>
+<span class="nc" id="L148">                loadImage(&quot;src/main/resources/WizardTD/gremlin4.png&quot;),</span>
+<span class="nc" id="L149">                loadImage(&quot;src/main/resources/WizardTD/gremlin5.png&quot;)</span>
+            ));
+<span class="nc" id="L151">            monsterDeathElement.put(&quot;worm&quot;, Arrays.asList(</span>
+<span class="nc" id="L152">                loadImage(&quot;src/main/resources/WizardTD/gremlin1.png&quot;),</span>
+<span class="nc" id="L153">                loadImage(&quot;src/main/resources/WizardTD/gremlin2.png&quot;),</span>
+<span class="nc" id="L154">                loadImage(&quot;src/main/resources/WizardTD/gremlin3.png&quot;),</span>
+<span class="nc" id="L155">                loadImage(&quot;src/main/resources/WizardTD/gremlin4.png&quot;),</span>
+<span class="nc" id="L156">                loadImage(&quot;src/main/resources/WizardTD/gremlin5.png&quot;)</span>
+            ));
+
+<span class="nc" id="L159">            towerElement.put(0, loadImage(&quot;src/main/resources/WizardTD/tower0.png&quot;));</span>
+<span class="nc" id="L160">            towerElement.put(1, loadImage(&quot;src/main/resources/WizardTD/tower1.png&quot;));</span>
+<span class="nc" id="L161">            towerElement.put(2, loadImage(&quot;src/main/resources/WizardTD/tower2.png&quot;));</span>
+<span class="nc" id="L162">            towerElement.put(3, loadImage(&quot;src/main/resources/WizardTD/tower3.png&quot;));</span>
+<span class="nc" id="L163">            towerElement.put(4, loadImage(&quot;src/main/resources/WizardTD/tower4.png&quot;));</span>
+<span class="nc" id="L164">            towerElement.put(5, loadImage(&quot;src/main/resources/WizardTD/tower5.png&quot;));</span>
+<span class="nc" id="L165">            towerElement.put(6, loadImage(&quot;src/main/resources/WizardTD/tower6.png&quot;));</span>
+<span class="nc" id="L166">            towerElement.put(7, loadImage(&quot;src/main/resources/WizardTD/tower7.png&quot;));</span>
+
+<span class="nc" id="L168">            bulletImage = loadImage(&quot;src/main/resources/WizardTD/fireball.png&quot;);</span>
+
+<span class="nc" id="L170">            firstRun = false;</span>
+        }
+
+
+<span class="nc bnc" id="L174" title="All 4 branches missed.">        if (menuButtons.get(&quot;endless&quot;).isOn() || endless) {</span>
+            
+<span class="nc" id="L176">            endless = true;</span>
+
+<span class="nc bnc" id="L178" title="All 2 branches missed.">            if (firstEndless) {</span>
+                
+<span class="nc" id="L180">                configPath = &quot;endless.json&quot;;</span>
+<span class="nc" id="L181">                menuPage = false;</span>
+<span class="nc" id="L182">                firstEndless = false;</span>
+            
+            } else {
+
+<span class="nc" id="L186">                List&lt;Wave&gt; newWavesList = new ArrayList&lt;Wave&gt;();</span>
+
+<span class="nc bnc" id="L188" title="All 2 branches missed.">                for (Wave wave : gameInterface.getWavesList()) {</span>
+
+<span class="nc" id="L190">                    int waveNumber = wave.getWaveNumber() + 5;</span>
+<span class="nc" id="L191">                    double duration = wave.getDuration() + 2;</span>
+<span class="nc" id="L192">                    double preWavePause = wave.getPreWavePause() + 3;</span>
+
+<span class="nc" id="L194">                    HashMap&lt;Monster, Integer&gt; newMonsterDict = new HashMap&lt;Monster, Integer&gt;();</span>
+<span class="nc bnc" id="L195" title="All 2 branches missed.">                    for (Monster monster : wave.getMonsterDict().keySet()) {</span>
+
+<span class="nc" id="L197">                        Random random = new Random();</span>
+
+<span class="nc" id="L199">                        String type = monster.getType();</span>
+<span class="nc" id="L200">                        PImage image = monster.getImage();</span>
+<span class="nc" id="L201">                        List&lt;PImage&gt; deathAnimation = monster.getDeathAnimation();</span>
+<span class="nc" id="L202">                        int hp = (int)(monster.getFullHp() * 1.5);</span>
+<span class="nc" id="L203">                        double speed = monster.getSpeed();</span>
+<span class="nc" id="L204">                        double armour = monster.getArmour() / 1.1;</span>
+<span class="nc" id="L205">                        int manaGainedOnKill = monster.getManaGainedOnKill() + 10;</span>
+
+<span class="nc" id="L207">                        int quantity = wave.getMonsterDict().get(monster) + random.nextInt(9) + 5;</span>
+
+<span class="nc" id="L209">                        newMonsterDict.put(new Monster(type, image, deathAnimation, hp, speed, armour, manaGainedOnKill, mapLayout), quantity);    </span>
+<span class="nc" id="L210">                    }</span>
+
+<span class="nc" id="L212">                    newWavesList.add(new Wave(waveNumber, duration, preWavePause, newMonsterDict));</span>
+<span class="nc" id="L213">                }</span>
+
+<span class="nc" id="L215">                gameInterface.updateEndlessInformation(newWavesList);</span>
+<span class="nc" id="L216">                return;</span>
+            }
+
+        } else {
+<span class="nc bnc" id="L220" title="All 2 branches missed.">            if (menuButtons.get(&quot;easy&quot;).isOn()) {</span>
+<span class="nc" id="L221">                configPath = &quot;easy.json&quot;;</span>
+<span class="nc" id="L222">                menuPage = false;</span>
+<span class="nc bnc" id="L223" title="All 2 branches missed.">            } else if (menuButtons.get(&quot;hard&quot;).isOn()) {</span>
+<span class="nc" id="L224">                configPath = &quot;hard.json&quot;;</span>
+<span class="nc" id="L225">                menuPage = false;</span>
+            }
+
+        }
+
+<span class="nc" id="L230">        mapLayout = new char[20][20];</span>
+<span class="nc" id="L231">        wavesList = new ArrayList&lt;&gt;();</span>
+
+
+<span class="nc" id="L234">        JSONObject configFile = loadJSONObject(configPath);</span>
+
+        // get map layout
+<span class="nc" id="L237">        String layoutFile = configFile.getString(&quot;layout&quot;);</span>
+        // extract content from the layout file (mapping layout)
+<span class="nc" id="L239">        String[] layoutTemp = loadStrings(layoutFile);</span>
+<span class="nc bnc" id="L240" title="All 2 branches missed.">        for (int i = 0; i &lt; layoutTemp.length; i += 1) {</span>
+<span class="nc" id="L241">            String row = layoutTemp[i];</span>
+<span class="nc bnc" id="L242" title="All 2 branches missed.">            for (int j = 0; j &lt; row.length(); j += 1) {</span>
+<span class="nc" id="L243">                mapLayout[i][j] = row.charAt(j);</span>
+            }
+        }
+
+        // get tower info 
+<span class="nc" id="L248">        int initialTowerRange = configFile.getInt(&quot;initial_tower_range&quot;);</span>
+<span class="nc" id="L249">        double initialTowerFiringSpeed = configFile.getDouble(&quot;initial_tower_firing_speed&quot;);</span>
+<span class="nc" id="L250">        int initialTowerDamage = configFile.getInt(&quot;initial_tower_damage&quot;);</span>
+<span class="nc" id="L251">        int towerCost = configFile.getInt(&quot;tower_cost&quot;);</span>
+
+        // get mana info
+<span class="nc" id="L254">        int initialMana = configFile.getInt(&quot;initial_mana&quot;);</span>
+<span class="nc" id="L255">        int initialManaCap = configFile.getInt(&quot;initial_mana_cap&quot;);</span>
+<span class="nc" id="L256">        double initialManaGainedPerSecond = configFile.getDouble(&quot;initial_mana_gained_per_second&quot;);</span>
+<span class="nc" id="L257">        int manaPoolSpellInitialCost = configFile.getInt(&quot;mana_pool_spell_initial_cost&quot;);</span>
+<span class="nc" id="L258">        int manaPoolSpellCostIncreasePerUse = configFile.getInt(&quot;mana_pool_spell_cost_increase_per_use&quot;);</span>
+<span class="nc" id="L259">        double manaPoolSpellCapMultiplier = configFile.getDouble(&quot;mana_pool_spell_cap_multiplier&quot;);</span>
+<span class="nc" id="L260">        double manaPoolSpellManaGainedMultiplier = configFile.getDouble(&quot;mana_pool_spell_mana_gained_multiplier&quot;);</span>
+
+<span class="nc" id="L262">        Mana mana = new Mana(initialMana, initialManaCap, initialManaGainedPerSecond, manaPoolSpellInitialCost, manaPoolSpellCostIncreasePerUse, manaPoolSpellCapMultiplier, manaPoolSpellManaGainedMultiplier);</span>
+
+        // retrieve the waves array
+        // get infomation for each wave and store in an array &quot;waves&quot;
+<span class="nc" id="L266">        JSONArray wavesContents = configFile.getJSONArray(&quot;waves&quot;);</span>
+<span class="nc bnc" id="L267" title="All 2 branches missed.">        for (int i = 0; i &lt; wavesContents.size(); i++) {</span>
+
+            // get each wave
+<span class="nc" id="L270">            JSONObject waveEach = wavesContents.getJSONObject(i);</span>
+
+<span class="nc" id="L272">            int waveNumber = i + 1;</span>
+<span class="nc" id="L273">            double duration = waveEach.getDouble(&quot;duration&quot;);</span>
+<span class="nc" id="L274">            double preWavePause = waveEach.getDouble(&quot;pre_wave_pause&quot;);</span>
+
+            // access and iterate over monsters within the wave
+<span class="nc" id="L277">            JSONArray monsters = waveEach.getJSONArray(&quot;monsters&quot;);</span>
+<span class="nc" id="L278">            HashMap&lt;Monster, Integer&gt; monsterDict = new HashMap&lt;&gt;();</span>
+
+<span class="nc bnc" id="L280" title="All 2 branches missed.">            for (int j = 0; j &lt; monsters.size(); j++) {</span>
+<span class="nc" id="L281">                JSONObject monsterInfo = monsters.getJSONObject(j);</span>
+
+                // Access monster properties
+<span class="nc" id="L284">                String type = monsterInfo.getString(&quot;type&quot;);</span>
+<span class="nc" id="L285">                int hp = monsterInfo.getInt(&quot;hp&quot;);</span>
+<span class="nc" id="L286">                float speed = monsterInfo.getFloat(&quot;speed&quot;);</span>
+<span class="nc" id="L287">                float armour = monsterInfo.getFloat(&quot;armour&quot;);</span>
+<span class="nc" id="L288">                int manaGainedOnKill = monsterInfo.getInt(&quot;mana_gained_on_kill&quot;);</span>
+<span class="nc" id="L289">                int quantity = monsterInfo.getInt(&quot;quantity&quot;);</span>
+
+<span class="nc" id="L291">                Monster monster = new Monster(type, monsterElement.get(type), monsterDeathElement.get(type), hp, speed, armour, manaGainedOnKill, mapLayout);</span>
+<span class="nc" id="L292">                monsterDict.put(monster, quantity);</span>
+            }
+
+<span class="nc" id="L295">            Wave wave = new Wave(waveNumber, duration, preWavePause, monsterDict);</span>
+<span class="nc" id="L296">            wavesList.add(wave);</span>
+        }
+        
+<span class="nc" id="L299">        gameInterface = new GameInterface(this, endless, menuButtons, mapLayout, mapElement, wavesList, 0, 0, mana, buttonElement, towerElement, initialTowerRange, initialTowerFiringSpeed, initialTowerDamage, towerCost, bulletImage);</span>
+<span class="nc" id="L300">        menuButtons.get(&quot;easy&quot;).setButtonStatus(false);</span>
+<span class="nc" id="L301">        menuButtons.get(&quot;hard&quot;).setButtonStatus(false);</span>
+<span class="nc" id="L302">        menuButtons.get(&quot;endless&quot;).setButtonStatus(false);</span>
+<span class="nc" id="L303">        buttonElement.get(&quot;FF&quot;).setButtonStatus(false);</span>
+<span class="nc" id="L304">        buttonElement.get(&quot;P&quot;).setButtonStatus(false);</span>
+<span class="nc" id="L305">        buttonElement.get(&quot;T&quot;).setButtonStatus(false);</span>
+<span class="nc" id="L306">        buttonElement.get(&quot;U1&quot;).setButtonStatus(false);</span>
+<span class="nc" id="L307">        buttonElement.get(&quot;U2&quot;).setButtonStatus(false);</span>
+<span class="nc" id="L308">        buttonElement.get(&quot;U3&quot;).setButtonStatus(false);</span>
+<span class="nc" id="L309">        buttonElement.get(&quot;M&quot;).setButtonStatus(false);</span>
+
+<span class="nc" id="L311">    }</span>
+
+    /**
+     * Receive key pressed signal from the keyboard.
+     */
+	@Override
+    public void keyPressed(){
+<span class="nc bnc" id="L318" title="All 2 branches missed.">        if (gameInterface.isGameLost()){</span>
+<span class="nc bnc" id="L319" title="All 4 branches missed.">            if (key == 'r' || key == 'R') {</span>
+<span class="nc bnc" id="L320" title="All 2 branches missed.">                if (endless) {</span>
+<span class="nc" id="L321">                    firstEndless = true;</span>
+                }
+<span class="nc" id="L323">                setup();</span>
+<span class="nc bnc" id="L324" title="All 4 branches missed.">            } else if (key == 'b' || key == 'B') {</span>
+<span class="nc" id="L325">                endless = false;</span>
+<span class="nc" id="L326">                firstEndless = true;</span>
+<span class="nc" id="L327">                menuPage = true;</span>
+<span class="nc" id="L328">                setup();</span>
+            }
+        }
+
+<span class="nc bnc" id="L332" title="All 2 branches missed.">        if (gameInterface.isGameWin()) {</span>
+<span class="nc" id="L333">            firstEndless = true;</span>
+<span class="nc" id="L334">            menuPage = true;</span>
+        } 
+
+<span class="nc bnc" id="L337" title="All 2 branches missed.">        for (Map.Entry&lt;String, Button&gt; entry : buttonElement.entrySet()) {</span>
+<span class="nc" id="L338">            Button button = entry.getValue();</span>
+
+<span class="nc bnc" id="L340" title="All 2 branches missed.">            if (key == button.getHotKey()) {</span>
+<span class="nc" id="L341">                button.updateStatus();</span>
+            }
+<span class="nc" id="L343">        }</span>
+<span class="nc" id="L344">    }</span>
+
+    /**
+     * Receive key released signal from the keyboard.
+     */
+	@Override
+    public void keyReleased(){
+<span class="nc" id="L351">    }</span>
+
+    /**
+     * Receive mouse pressed signal from the mouse.
+     */
+    @Override
+    public void mousePressed(MouseEvent e) {
+
+<span class="nc bnc" id="L359" title="All 2 branches missed.">        if (menuPage) {</span>
+<span class="nc bnc" id="L360" title="All 2 branches missed.">            for (Map.Entry&lt;String, Button&gt; entry : menuButtons.entrySet()) {</span>
+<span class="nc" id="L361">                Button button = entry.getValue();</span>
+<span class="nc bnc" id="L362" title="All 2 branches missed.">                if (button.hasMouseOver()) {</span>
+<span class="nc" id="L363">                    button.updateStatus();</span>
+<span class="nc" id="L364">                    setup();</span>
+                }
+<span class="nc" id="L366">            }</span>
+        }
+
+
+<span class="nc bnc" id="L370" title="All 2 branches missed.">        for (Map.Entry&lt;String, Button&gt; entry : buttonElement.entrySet()) {</span>
+<span class="nc" id="L371">            Button button = entry.getValue();</span>
+
+<span class="nc bnc" id="L373" title="All 2 branches missed.">            if (button.hasMouseOver()) {</span>
+<span class="nc" id="L374">                button.updateStatus();</span>
+            }
+<span class="nc" id="L376">        }</span>
+
+<span class="nc bnc" id="L378" title="All 4 branches missed.">        if (buttonElement.get(&quot;T&quot;).isOn() &amp;&amp; gameInterface.checkMousePosition(0, 40, 640, 640)) {</span>
+<span class="nc" id="L379">            gameInterface.buildNewTower();</span>
+        }
+
+<span class="nc bnc" id="L382" title="All 8 branches missed.">        if ((buttonElement.get(&quot;U1&quot;).isOn() || buttonElement.get(&quot;U2&quot;).isOn() || buttonElement.get(&quot;U3&quot;).isOn()) &amp;&amp; gameInterface.checkMousePosition(0, 40, 640, 640)) {</span>
+<span class="nc" id="L383">            gameInterface.upgradeTower();</span>
+        }
+<span class="nc" id="L385">    }</span>
+
+
+    /**
+     * Receive mouse released signal from the mouse.
+     */
+    @Override
+    public void mouseReleased(MouseEvent e) {
+<span class="nc" id="L393">    }</span>
+
+
+    /**
+     * Draw all elements in the game by current frame.
+     */
+	@Override
+    public void draw() {
+
+<span class="nc bnc" id="L402" title="All 2 branches missed.">        if (menuPage) {</span>
+
+<span class="nc" id="L404">            gameInterface.drawStartMenu();</span>
+
+        } else {
+
+<span class="nc" id="L408">            gameInterface.drawMap();</span>
+<span class="nc" id="L409">            gameInterface.drawTowerBullet();</span>
+<span class="nc" id="L410">            gameInterface.drawBackground();</span>
+
+<span class="nc" id="L412">            gameInterface.drawTimer();</span>
+<span class="nc" id="L413">            gameInterface.drawMana();</span>
+<span class="nc" id="L414">            gameInterface.drawMenu();</span>
+<span class="nc" id="L415">            gameInterface.drawTowerUpgradeInfo();</span>
+
+<span class="nc" id="L417">            gameInterface.drawMonster();</span>
+<span class="nc" id="L418">            gameInterface.drawWizardHouse();</span>
+
+<span class="nc bnc" id="L420" title="All 4 branches missed.">            if (gameInterface.isGameWin() &amp;&amp; !endless) {</span>
+<span class="nc" id="L421">                gameInterface.drawGameWin();</span>
+            }
+
+<span class="nc bnc" id="L424" title="All 2 branches missed.">            if (gameInterface.isGameLost()) {</span>
+<span class="nc" id="L425">                gameInterface.drawGameLost();</span>
+            }
+
+<span class="nc bnc" id="L428" title="All 4 branches missed.">            if (endless &amp;&amp; gameInterface.isReadyForNextRound()) {</span>
+<span class="nc" id="L429">                gameInterface.updateReadyForNextRound();</span>
+<span class="nc" id="L430">                setup();</span>
+            }
+
+            
+        }
+
+<span class="nc" id="L436">    }</span>
+
+
+    public static void main(String[] args) {
+<span class="nc" id="L440">        PApplet.main(&quot;WizardTD.App&quot;);</span>
+<span class="nc" id="L441">    }</span>
+
+    /**
+     * Source: https://stackoverflow.com/questions/37758061/rotate-a-buffered-image-in-java
+     * @param pimg The image to be rotated
+     * @param angle between 0 and 360 degrees
+     * @return the new rotated image
+     */
+    public PImage rotateImageByDegrees(PImage pimg, double angle) {
+<span class="nc" id="L450">        BufferedImage img = (BufferedImage) pimg.getNative();</span>
+<span class="nc" id="L451">        double rads = Math.toRadians(angle);</span>
+<span class="nc" id="L452">        double sin = Math.abs(Math.sin(rads)), cos = Math.abs(Math.cos(rads));</span>
+<span class="nc" id="L453">        int w = img.getWidth();</span>
+<span class="nc" id="L454">        int h = img.getHeight();</span>
+<span class="nc" id="L455">        int newWidth = (int) Math.floor(w * cos + h * sin);</span>
+<span class="nc" id="L456">        int newHeight = (int) Math.floor(h * cos + w * sin);</span>
+
+<span class="nc" id="L458">        PImage result = this.createImage(newWidth, newHeight, RGB);</span>
+        //BufferedImage rotated = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_ARGB);
+<span class="nc" id="L460">        BufferedImage rotated = (BufferedImage) result.getNative();</span>
+<span class="nc" id="L461">        Graphics2D g2d = rotated.createGraphics();</span>
+<span class="nc" id="L462">        AffineTransform at = new AffineTransform();</span>
+<span class="nc" id="L463">        at.translate((newWidth - w) / 2, (newHeight - h) / 2);</span>
+
+<span class="nc" id="L465">        int x = w / 2;</span>
+<span class="nc" id="L466">        int y = h / 2;</span>
+
+<span class="nc" id="L468">        at.rotate(rads, x, y);</span>
+<span class="nc" id="L469">        g2d.setTransform(at);</span>
+<span class="nc" id="L470">        g2d.drawImage(img, 0, 0, null);</span>
+<span class="nc" id="L471">        g2d.dispose();</span>
+<span class="nc bnc" id="L472" title="All 2 branches missed.">        for (int i = 0; i &lt; newWidth; i++) {</span>
+<span class="nc bnc" id="L473" title="All 2 branches missed.">            for (int j = 0; j &lt; newHeight; j++) {</span>
+<span class="nc" id="L474">                result.set(i, j, rotated.getRGB(i, j));</span>
+            }
+        }
+
+<span class="nc" id="L478">        return result;</span>
+    }
+}
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

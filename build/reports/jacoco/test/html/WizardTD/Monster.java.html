@@ -1,0 +1,473 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>Monster.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Wizard-Tower-Defence</a> &gt; <a href="index.source.html" class="el_package">WizardTD</a> &gt; <span class="el_source">Monster.java</span></div><h1>Monster.java</h1><pre class="source lang-java linenums">package WizardTD;
+
+import processing.core.PImage;
+import java.io.*;
+import java.util.*;
+
+
+/**
+ * Monster will be spawned in the game, and move along to path to the Wizard House.
+ * 
+ * @author Junrui Kang
+ * @version 1.0.0
+ */
+public class Monster {
+	
+	private String type;
+	private PImage image;
+	private List&lt;PImage&gt; deathAnimation;
+
+    private int fullHp;
+    private int currentHp;
+
+    private double speed;
+    private double armour;
+    private int manaGainedOnKill;
+
+    private char[][] mapLayout;
+
+    private Point startPosition;
+    private Point currentPosition;
+    private float x;
+    private float y;
+    private int xStart;
+    private int yStart;
+
+    private boolean dying;
+    private int dyingCounter;
+    private boolean dead;
+
+<span class="nc" id="L40">    private char lastMove = ' ';</span>
+<span class="nc" id="L41">    private boolean firstMove = true;</span>
+
+
+<span class="nc" id="L44">    public Monster(String type, PImage image, List&lt;PImage&gt; deathAnimation, int hp, double speed, double armour, int manaGainedOnKill, char[][] mapLayout) {</span>
+
+<span class="nc" id="L46">    	this.type = type;</span>
+<span class="nc" id="L47">    	this.image = image;</span>
+<span class="nc" id="L48">    	this.deathAnimation = deathAnimation;</span>
+
+<span class="nc" id="L50">    	this.fullHp = hp;</span>
+<span class="nc" id="L51">    	this.currentHp = hp;</span>
+
+<span class="nc" id="L53">    	this.speed = speed;</span>
+<span class="nc" id="L54">    	this.armour = armour;</span>
+<span class="nc" id="L55">    	this.manaGainedOnKill = manaGainedOnKill;</span>
+
+<span class="nc" id="L57">        this.mapLayout = mapLayout;</span>
+        
+<span class="nc" id="L59">        setSpawnPosition();</span>
+<span class="nc" id="L60">        findPath();</span>
+
+<span class="nc" id="L62">        this.dying = false;</span>
+<span class="nc" id="L63">        this.dyingCounter = 0;</span>
+<span class="nc" id="L64">        this.dead = false;</span>
+<span class="nc" id="L65">    }</span>
+
+
+    /**
+     * Get the type of the monster.
+     * 
+     * @return monster type
+     */
+	public String getType() {
+<span class="nc" id="L74">        return type;</span>
+    }
+
+
+    /**
+     * Get the full hp of the monster.
+     * 
+     * @return full hp
+     */
+	public int getFullHp() {
+<span class="nc" id="L84">		return fullHp;</span>
+    }
+
+
+    /**
+     * Get the current hp of the monster.
+     * 
+     * @return current hp
+     */
+	public int getCurrentHp() {
+<span class="nc" id="L94">		return currentHp;</span>
+    }
+
+
+    /**
+     * Get the speed of the monster.
+     * 
+     * @return monster speed
+     */
+	public double getSpeed() {
+<span class="nc" id="L104">		return speed;</span>
+    }
+
+
+    /**
+     * Get the armour of the monster.
+     * 
+     * @return monster armour
+     */
+    public double getArmour() {
+<span class="nc" id="L114">        return armour;</span>
+    }
+
+
+    /**
+     * Get the amount of mana when the monster is killed.
+     * 
+     * @return mana gained on kill
+     */
+    public int getManaGainedOnKill() {
+<span class="nc" id="L124">        return manaGainedOnKill;</span>
+    }
+
+
+    /**
+     * Get the position of the monster.
+     * 
+     * @return monster position in {x,y}
+     */
+    public float[] getPosition() {
+<span class="nc" id="L134">        return new float[]{x * 32 + 5, y * 32 + 45};</span>
+    }
+
+
+    /**
+     * Get the image of the monster.
+     * 
+     * @return monster image
+     */
+    public PImage getImage() {
+<span class="nc" id="L144">        return image;</span>
+    }
+
+
+    /**
+     * Get the death animatopn of the monster.
+     * 
+     * @return monster death animation in a list
+     */
+    public List&lt;PImage&gt; getDeathAnimation() {
+<span class="nc" id="L154">        return deathAnimation;</span>
+    }
+
+
+    /**
+     * Get the percentage of hp out of full hp of the monster.
+     * 
+     * @return percentage of hp
+     */
+    public float getHpPercentage() {
+<span class="nc" id="L164">        return ((int)currentHp * 29 / fullHp);</span>
+    }
+
+
+    /**
+     * Monster's hp will be decreased when it takes damage.
+     * 
+     * @param damage damage taken
+     */
+    public void takeDamage(int damage) {
+<span class="nc" id="L174">        currentHp -= armour * damage;</span>
+<span class="nc bnc" id="L175" title="All 2 branches missed.">        if (currentHp &lt;= 0) {</span>
+<span class="nc" id="L176">            currentHp = 0;</span>
+<span class="nc" id="L177">            dying = true;</span>
+        }
+<span class="nc" id="L179">    }</span>
+
+
+    /**
+     * Monster's image will be updated to its death animation when it is dying.
+     */
+    public void updateDyingImage() {
+<span class="nc bnc" id="L186" title="All 2 branches missed.">        if (dying){</span>
+<span class="nc bnc" id="L187" title="All 6 branches missed.">            switch(dyingCounter) {</span>
+            case 3:
+<span class="nc" id="L189">                image = deathAnimation.get(0);</span>
+<span class="nc" id="L190">                break;</span>
+            case 7:
+<span class="nc" id="L192">                image = deathAnimation.get(1);</span>
+<span class="nc" id="L193">                break;</span>
+            case 11:
+<span class="nc" id="L195">                image = deathAnimation.get(2);</span>
+<span class="nc" id="L196">                break;</span>
+            case 15:
+<span class="nc" id="L198">                image = deathAnimation.get(3);</span>
+<span class="nc" id="L199">                break;</span>
+            case 29:
+<span class="nc" id="L201">                image = deathAnimation.get(4);</span>
+                break;
+            }
+<span class="nc" id="L204">            dyingCounter += 1;  </span>
+        }
+<span class="nc bnc" id="L206" title="All 2 branches missed.">        if (dyingCounter == 20) {</span>
+<span class="nc" id="L207">            dying = false;</span>
+<span class="nc" id="L208">            dead = true;</span>
+        }
+<span class="nc" id="L210">    }</span>
+
+
+    /**
+     * Get whether the monster is dying.
+     * 
+     * @return monster dying status
+     */
+    public boolean isDying() {
+<span class="nc" id="L219">        return dying;</span>
+    }
+
+
+    /**
+     * Get whether the monster is dead. It will be removed when it is dead.
+     * 
+     * @return monster dead status
+     */
+    public boolean isDead() {
+<span class="nc" id="L229">        return dead;</span>
+    }
+
+
+    /**
+     * The spawn position of the monster will be determined based on the map layout.
+     * 
+     * It will extract all 'X' at the edge of the map, and select a random point to spawn.
+    */
+    public void setSpawnPosition() {
+
+<span class="nc" id="L240">        List&lt;int[]&gt; spawnPositions = new ArrayList&lt;&gt;();</span>
+
+        // iterate through the top and bottom rows
+<span class="nc bnc" id="L243" title="All 2 branches missed.">        for (int i = 0; i &lt; mapLayout[0].length; i+=1) {</span>
+<span class="nc bnc" id="L244" title="All 2 branches missed.">            if (mapLayout[0][i] == 'X') {</span>
+<span class="nc" id="L245">                spawnPositions.add(new int[]{i, 0});</span>
+            }
+<span class="nc bnc" id="L247" title="All 2 branches missed.">            if (mapLayout[mapLayout.length - 1][i] == 'X') {</span>
+<span class="nc" id="L248">                spawnPositions.add(new int[]{i, (mapLayout.length - 1)});</span>
+            }
+        }
+
+        // iterate through the left and right columns
+<span class="nc bnc" id="L253" title="All 2 branches missed.">        for (int j = 0; j &lt; mapLayout.length; j+=1) {</span>
+<span class="nc bnc" id="L254" title="All 2 branches missed.">            if (mapLayout[j][0] == 'X') {</span>
+<span class="nc" id="L255">                spawnPositions.add(new int[]{0, j});</span>
+            }
+<span class="nc bnc" id="L257" title="All 2 branches missed.">            if (mapLayout[j][mapLayout[0].length - 1] == 'X') {</span>
+<span class="nc" id="L258">                spawnPositions.add(new int[]{(mapLayout[0].length - 1), j});</span>
+            }
+        }
+
+        // use modulo to randomly spawn a monster in random starting position
+<span class="nc" id="L263">        Random random = new Random();</span>
+<span class="nc" id="L264">        int randomIndex = random.nextInt(spawnPositions.size());</span>
+<span class="nc" id="L265">        x = spawnPositions.get(randomIndex)[0];</span>
+<span class="nc" id="L266">        xStart = (int)x;</span>
+<span class="nc" id="L267">        y = spawnPositions.get(randomIndex)[1];</span>
+<span class="nc" id="L268">        yStart = (int)y;</span>
+<span class="nc" id="L269">    }</span>
+
+
+    /**
+     * Monster's path finding algorithm using BFS search.
+     * 
+     * All the point 'X' that can be reached by the monster will be found first, and stored in a queue.
+     * 
+     * These points have the attribute of the previous point pointFrom.
+     * 
+     * The path finding starts from the end point (wizard's house).
+     * 
+     * During the finding process, all points will be linked together.
+     * 
+     * These point will be updated with an attribute of pointNext.
+     * 
+     * The path stops when it reaches the start position, where it does not have a pointFrom.
+     * 
+     * Then the starting point of the monster will be set as currentPosition.
+     */
+    public void findPath() {
+
+<span class="nc" id="L291">        Queue&lt;Point&gt; queue = new LinkedList&lt;&gt;();</span>
+
+        // the starting point will not contain and parent point
+<span class="nc" id="L294">        Point start = new Point(xStart, yStart, null);</span>
+<span class="nc" id="L295">        Point end = null;</span>
+
+<span class="nc" id="L297">        queue.add(start);</span>
+
+        // this 2D array matches with mapLayout array to record all visited points
+<span class="nc" id="L300">        boolean[][] visited = new boolean[20][20];</span>
+<span class="nc" id="L301">        visited[yStart][xStart] = true;</span>
+
+<span class="nc bnc" id="L303" title="All 2 branches missed.">        while (!queue.isEmpty()) {</span>
+<span class="nc" id="L304">            Point currentPoint = queue.poll();</span>
+<span class="nc" id="L305">            int x = currentPoint.x;</span>
+<span class="nc" id="L306">            int y = currentPoint.y;</span>
+
+            // reached to the wizard house
+<span class="nc bnc" id="L309" title="All 2 branches missed.">            if (mapLayout[y][x] == 'W') {</span>
+<span class="nc" id="L310">                end = currentPoint;</span>
+<span class="nc" id="L311">                break;</span>
+            }
+
+            // movements to explore the neibouring points by moving 1 unit at a time
+<span class="nc" id="L315">            int[] dx = {0, 1, 0, -1};</span>
+<span class="nc" id="L316">            int[] dy = {1, 0, -1, 0};</span>
+
+<span class="nc bnc" id="L318" title="All 2 branches missed.">            for (int i = 0; i &lt; 4; i += 1) {</span>
+<span class="nc" id="L319">                int newX = x + dx[i];</span>
+<span class="nc" id="L320">                int newY = y + dy[i];</span>
+
+                // check the validity of the point
+                // 1. in the index range
+                // 2. not visited
+                // 3. is a path (X)
+<span class="nc bnc" id="L326" title="All 8 branches missed.">                if (newX &lt; 20 &amp;&amp; newX &gt;= 0 &amp;&amp; newY &lt; 20 &amp;&amp; newY &gt;= 0) {</span>
+<span class="nc bnc" id="L327" title="All 6 branches missed.">                    if (!visited[newY][newX] &amp;&amp; (mapLayout[newY][newX] == 'X' || mapLayout[newY][newX] == 'W')) {</span>
+                        // update the visit status
+<span class="nc" id="L329">                        visited[newY][newX] = true;</span>
+<span class="nc" id="L330">                        Point neighbor = new Point(newX, newY, currentPoint);</span>
+<span class="nc" id="L331">                        queue.add(neighbor);</span>
+                    } 
+                }
+
+            }
+<span class="nc" id="L336">        }</span>
+
+        // if the finish point is found, join all points to form a path
+<span class="nc bnc" id="L339" title="All 2 branches missed.">        if (end != null) {</span>
+            // starting from the end point
+<span class="nc" id="L341">            Point current = end;</span>
+            // the loop will end if this current point is the starting point (pointFrom = null)
+<span class="nc bnc" id="L343" title="All 2 branches missed.">            while (current != null) {</span>
+<span class="nc bnc" id="L344" title="All 2 branches missed.">                if (current.pointFrom != null) {</span>
+<span class="nc" id="L345">                    current.pointFrom.setNextPoint(current);</span>
+                } else {
+<span class="nc" id="L347">                    startPosition = current;</span>
+<span class="nc" id="L348">                    currentPosition = current;</span>
+                }
+                // get the pointfrom
+<span class="nc" id="L351">                current = current.pointFrom;</span>
+            }
+        }
+<span class="nc" id="L354">    }</span>
+
+
+    /**
+     * The monster moves with a given distance value.
+     * 
+     * @param distance distance to move each frame
+     */
+    public void move(float distance) {
+<span class="nc" id="L363">        double limit = distance / 20;</span>
+
+        // if there is a next point, the monster will move towards it
+<span class="nc bnc" id="L366" title="All 2 branches missed.">        if (currentPosition.pointNext != null) {</span>
+
+            // if the monster reaches the next point, set the current point as it
+<span class="nc bnc" id="L369" title="All 8 branches missed.">            if (firstMove || lastMove == 'n' || (Math.abs(x - currentPosition.pointNext.x) &lt;= limit &amp;&amp; Math.abs(y - currentPosition.pointNext.y) &lt;= limit)) {</span>
+<span class="nc" id="L370">                currentPosition = currentPosition.pointNext;</span>
+<span class="nc" id="L371">                firstMove = false;</span>
+<span class="nc" id="L372">                lastMove = ' ';</span>
+
+            // the monster will move to the next point based on its relative position to the next
+<span class="nc bnc" id="L375" title="All 4 branches missed.">            } else if (Math.abs(x - currentPosition.pointNext.x) != 0 &amp;&amp; Math.abs(y - currentPosition.pointNext.y) &lt;= limit) {</span>
+<span class="nc bnc" id="L376" title="All 2 branches missed.">                if (x &gt; currentPosition.pointNext.x) {</span>
+<span class="nc" id="L377">                    x -= distance;</span>
+<span class="nc bnc" id="L378" title="All 2 branches missed.">                    if (lastMove == 'r') {</span>
+<span class="nc" id="L379">                        lastMove = 'n';</span>
+                    } else {
+<span class="nc" id="L381">                        lastMove = 'l';</span>
+                    }
+                } else {
+<span class="nc" id="L384">                    x += distance;</span>
+<span class="nc bnc" id="L385" title="All 2 branches missed.">                    if (lastMove == 'l') {</span>
+<span class="nc" id="L386">                        lastMove = 'n';</span>
+                    } else {
+<span class="nc" id="L388">                        lastMove = 'r';</span>
+                    }
+                }
+<span class="nc bnc" id="L391" title="All 4 branches missed.">            } else if (Math.abs(x - currentPosition.pointNext.x) &lt;= limit &amp;&amp; Math.abs(y - currentPosition.pointNext.y) != 0) {</span>
+<span class="nc bnc" id="L392" title="All 2 branches missed.">                if (y &gt; currentPosition.pointNext.y) {</span>
+<span class="nc" id="L393">                    y -= distance;</span>
+<span class="nc bnc" id="L394" title="All 2 branches missed.">                    if (lastMove == 'd') {</span>
+<span class="nc" id="L395">                        lastMove = 'n';</span>
+                    } else {
+<span class="nc" id="L397">                        lastMove = 'u';</span>
+                    }
+                } else {
+<span class="nc" id="L400">                    y += distance;</span>
+<span class="nc bnc" id="L401" title="All 2 branches missed.">                    if (lastMove == 'u') {</span>
+<span class="nc" id="L402">                        lastMove = 'n';</span>
+                    } else {
+<span class="nc" id="L404">                        lastMove = 'd';</span>
+                    }
+                }
+
+            // if the monster is close enough to the next point, it will directly move to the next point
+            } else {
+<span class="nc bnc" id="L410" title="All 2 branches missed.">                if ((int) Math.abs(x - currentPosition.pointNext.x) == 0) {</span>
+<span class="nc" id="L411">                    x = currentPosition.pointNext.x;</span>
+<span class="nc bnc" id="L412" title="All 2 branches missed.">                } else if ((int) Math.abs(y - currentPosition.pointNext.y) == 0) {</span>
+<span class="nc" id="L413">                    y = currentPosition.pointNext.y;</span>
+                }
+            }
+        }
+<span class="nc" id="L417">    }</span>
+
+
+    /**
+     * Check whether the monster has reached the wizard house.
+     * 
+     * @return whether the monster has reached the wizard house
+     */
+    public boolean hasReachedWizardHouse() {
+<span class="nc bnc" id="L426" title="All 2 branches missed.">        return (currentPosition.pointNext == null);</span>
+    }
+
+
+    /**
+     * The monster will be banished when it reaches the wizard house and respawn at the starting position.
+     */
+    public void banishMonster() {
+<span class="nc" id="L434">        x = xStart;</span>
+<span class="nc" id="L435">        y = yStart;</span>
+<span class="nc" id="L436">        currentPosition = startPosition;</span>
+<span class="nc" id="L437">    }</span>
+
+
+
+}
+
+
+
+/**
+ * A point contains infomation of the current point coordinate and its connected parent point
+ */ 
+class Point {
+
+    int x , y;
+    Point pointFrom;
+    Point pointNext;
+
+<span class="nc" id="L454">    public Point(int x, int y, Point pointFrom) {</span>
+<span class="nc" id="L455">        this.x = x;</span>
+<span class="nc" id="L456">        this.y = y;</span>
+<span class="nc" id="L457">        this.pointFrom = pointFrom;</span>
+<span class="nc" id="L458">        this.pointNext = null;</span>
+<span class="nc" id="L459">    }</span>
+
+
+    /**
+     * The next point of the current point will be set.
+     * 
+     * @param point next point
+     */
+    public void setNextPoint(Point point) {
+<span class="nc" id="L468">        pointNext = point;</span>
+<span class="nc" id="L469">    }</span>
+}
+
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>

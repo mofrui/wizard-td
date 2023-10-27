@@ -1,0 +1,962 @@
+<?xml version="1.0" encoding="UTF-8"?><!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd"><html xmlns="http://www.w3.org/1999/xhtml" lang="zh"><head><meta http-equiv="Content-Type" content="text/html;charset=UTF-8"/><link rel="stylesheet" href="../jacoco-resources/report.css" type="text/css"/><link rel="shortcut icon" href="../jacoco-resources/report.gif" type="image/gif"/><title>GameInterface.java</title><link rel="stylesheet" href="../jacoco-resources/prettify.css" type="text/css"/><script type="text/javascript" src="../jacoco-resources/prettify.js"></script></head><body onload="window['PR_TAB_WIDTH']=4;prettyPrint()"><div class="breadcrumb" id="breadcrumb"><span class="info"><a href="../jacoco-sessions.html" class="el_session">Sessions</a></span><a href="../index.html" class="el_report">Wizard-Tower-Defence</a> &gt; <a href="index.source.html" class="el_package">WizardTD</a> &gt; <span class="el_source">GameInterface.java</span></div><h1>GameInterface.java</h1><pre class="source lang-java linenums">package WizardTD;
+
+import processing.core.PApplet;
+import processing.core.PImage;
+import processing.data.JSONArray;
+import processing.data.JSONObject;
+import processing.event.MouseEvent;
+
+import java.awt.Graphics2D;
+import java.awt.geom.AffineTransform;
+import java.awt.image.BufferedImage;
+
+import java.io.*;
+import java.util.*;
+
+
+
+/**
+ * GameInterface class handles the interactions between different components of the game.
+ * 
+ * It is a collection of draw methods, as well as handling object interactions.
+ * 
+ * @author Junrui Kang
+ * @version 1.0.0
+ */
+public class GameInterface {
+
+    /**
+     * Frame rate of the game.
+     */
+<span class="nc" id="L31">	private final int frameRate = 60;</span>
+
+    /**
+     * PApplet object of the main app.java class.
+     */
+	private PApplet app;
+
+    /**
+     * A boolean indicating the gamemode is endless or not.
+     */
+    private boolean endless;
+
+    /**
+     * A collection of buttons in the menu pages.
+     */
+    private HashMap&lt;String,Button&gt; menuButtons;
+
+    /**
+     * A 2d array of map layout extracted from the configuration file.
+     */
+	private char[][] mapLayout;
+
+    /**
+     * A collection of map image elements loaded during the setip.
+     */
+	private HashMap&lt;String,PImage&gt; mapElement;
+
+    /**
+     * The coordinate of wizard house that will be drawn separately.
+     */
+<span class="nc" id="L61">    private int wizard_house_x = 0, wizard_house_y = 0;</span>
+
+    /**
+     * A list of waves that will be executed one by one.
+     */
+	private List&lt;Wave&gt; wavesList;
+
+    /**
+     * The current wave that the game is using.
+     */
+	private Wave currentWave;
+
+    /**
+     * The next wave that the game will be using.
+     */
+    private Wave nextWave;
+
+    /**
+     * The current wave number displayed in the information bar.
+     */
+    private int currentWaveNumber;
+
+    /**
+     * The total number of waves.
+     */
+    private int totalWaveNumber;
+
+    /**
+     * Mana object.
+     */
+    private Mana mana; 
+
+    /**
+     * A collection of buttons in the gameboard interface.
+     */
+	private HashMap&lt;String, Button&gt; buttonElement;
+
+    /**
+     * A list of monsters that are currently alive in the gameboard.
+     */
+    private List&lt;Monster&gt; currentMonsterList;
+
+    /**
+     * A list of towers that are currently built in the gameboard.
+     */
+    private List&lt;Tower&gt; currentTowerList;
+
+    /**
+     * A collection of tower images in the gameboard interface.
+     */
+    private HashMap&lt;Integer, PImage&gt; towerElement;
+
+    /**
+     * Initial tower range extracted from the configuration file.
+     */
+    private int initialTowerRange;
+
+    /**
+     * Initial tower firing speed extracted from the configuration file.
+     */
+    private double initialTowerFiringSpeed;
+
+    /**
+     * Initial tower damage extracted from the configuration file.
+     */
+    private int initialTowerDamage;
+
+    /**
+     * Initial tower cost extracted from the configuration file.
+     */
+    private int towerCost;
+
+    /**
+     * Image of the bullet fired from the tower.
+     */
+    private PImage bulletImage;
+
+    /**
+     * A boolean that indicates if the game is lost.
+     */
+<span class="nc" id="L141">    private boolean gameLost = false;</span>
+
+    /**
+     * A boolean that indicates if the game is ready for the next round in the endless mode.
+     */
+<span class="nc" id="L146">    private boolean readyForNextRound = false;</span>
+
+
+	public GameInterface(
+        PApplet app,
+        boolean endless,
+        HashMap&lt;String,Button&gt; menuButtons,
+        char[][] mapLayout,
+        HashMap&lt;String,PImage&gt; mapElement,
+        List&lt;Wave&gt; wavesList,
+        int lastWaveNumber,
+        int totalWaveNumberStreak,
+        Mana mana,
+        HashMap&lt;String, Button&gt; buttonElement,
+        HashMap&lt;Integer, PImage&gt; towerElement,
+        int initialTowerRange,
+        double initialTowerFiringSpeed,
+        int initialTowerDamage,
+        int towerCost,
+        PImage bulletImage
+<span class="nc" id="L166">    ) {</span>
+
+<span class="nc" id="L168">		this.app = app;</span>
+<span class="nc" id="L169">        this.endless = endless;</span>
+
+<span class="nc" id="L171">        this.menuButtons = menuButtons;</span>
+
+<span class="nc" id="L173">		this.mapLayout = mapLayout;</span>
+<span class="nc" id="L174">		this.mapElement = mapElement;</span>
+
+<span class="nc" id="L176">		this.wavesList = wavesList;</span>
+
+<span class="nc" id="L178">        this.currentWaveNumber = 0;</span>
+<span class="nc" id="L179">        this.totalWaveNumber = wavesList.size();</span>
+
+<span class="nc" id="L181">        this.mana = mana;</span>
+
+<span class="nc" id="L183">		this.buttonElement = buttonElement;</span>
+
+<span class="nc" id="L185">        this.currentMonsterList = new ArrayList&lt;Monster&gt;();</span>
+
+<span class="nc" id="L187">        this.currentTowerList = new ArrayList&lt;Tower&gt;();</span>
+<span class="nc" id="L188">        this.towerElement = towerElement;</span>
+<span class="nc" id="L189">        this.initialTowerRange = initialTowerRange;</span>
+<span class="nc" id="L190">        this.initialTowerFiringSpeed = initialTowerFiringSpeed;</span>
+<span class="nc" id="L191">        this.initialTowerDamage = initialTowerDamage;</span>
+<span class="nc" id="L192">        this.towerCost = towerCost;</span>
+
+<span class="nc" id="L194">        this.bulletImage = bulletImage;</span>
+<span class="nc" id="L195">	}</span>
+
+
+    /**
+     * Check whether rmouse position is in a specific area or not
+     * 
+     * @param x The x-position of the target area.
+     * @param y The y-position of the target area.
+     * @param width The width of the target area.
+     * @param height The height of the target area.
+     * 
+     * @return A boolean that whether the mouse is in the area.
+     */
+    public boolean checkMousePosition(int x, int y, int width, int height) {
+<span class="nc bnc" id="L209" title="All 8 branches missed.">        return (</span>
+            app.mouseX &gt;= x &amp;&amp;
+            app.mouseX &lt;= x + width &amp;&amp;
+            app.mouseY &gt;= y &amp;&amp;
+            app.mouseY &lt;= y + height
+        );
+    }
+
+
+    /**
+     * Draw and handle the starting menu buttons of the game.
+     */
+    public void drawStartMenu() {
+
+<span class="nc" id="L223">        app.noStroke();</span>
+<span class="nc" id="L224">        app.fill(137, 115, 76);</span>
+<span class="nc" id="L225">        app.rect(0, 0, 760, 760);</span>
+
+<span class="nc" id="L227">        app.fill(10, 0, 0);</span>
+<span class="nc" id="L228">        app.textSize(50);</span>
+<span class="nc" id="L229">        app.text(&quot;Wizard Tower Defence&quot;, 100, 280);</span>
+
+<span class="nc bnc" id="L231" title="All 2 branches missed.">        for (Map.Entry&lt;String, Button&gt; entry : menuButtons.entrySet()) {</span>
+<span class="nc" id="L232">            Button button = entry.getValue();</span>
+        
+            // set whether the mouse is over the button
+<span class="nc" id="L235">            button.updateMouseOver(checkMousePosition(button.getX(), button.getY(), 160, 50));</span>
+    
+<span class="nc bnc" id="L237" title="All 2 branches missed.">            if (button.isOn()) {</span>
+<span class="nc" id="L238">                app.fill(255, 227, 132);</span>
+<span class="nc bnc" id="L239" title="All 2 branches missed.">            } else if (button.hasMouseOver()) {</span>
+<span class="nc" id="L240">                app.fill(128,128,128);</span>
+            } else {
+<span class="nc" id="L242">                app.noFill();</span>
+            }
+<span class="nc" id="L244">            app.stroke(10, 0, 0);</span>
+<span class="nc" id="L245">            app.strokeWeight(3);</span>
+<span class="nc" id="L246">            app.rect(button.getX(), button.getY(), 160, 50);</span>
+
+<span class="nc" id="L248">            app.fill(10, 0, 0);</span>
+<span class="nc" id="L249">            app.textSize(20);</span>
+<span class="nc" id="L250">            app.text(button.getName(), button.getX() + 30, button.getY() + 30);</span>
+<span class="nc" id="L251">        }</span>
+<span class="nc" id="L252">    }</span>
+
+
+    /**
+     * Draw the background of the status bar and menu bar in the game.
+     */
+	public void drawBackground() {
+		// the status background
+<span class="nc" id="L260">        app.noStroke();</span>
+<span class="nc" id="L261">        app.fill(137, 115, 76);</span>
+<span class="nc" id="L262">        app.rect(0, 0, 760, 40);</span>
+        // the menu background
+<span class="nc" id="L264">        app.noStroke();</span>
+<span class="nc" id="L265">        app.fill(137, 115, 76);</span>
+<span class="nc" id="L266">        app.rect(640, 40, 680, 680);</span>
+<span class="nc" id="L267">	}</span>
+
+    /**
+     * Draw the gameboard map.
+     */
+	public void drawMap() {
+
+        // y and x here correspond with the x and y coordinate
+<span class="nc bnc" id="L275" title="All 2 branches missed.">        for (int y = 0; y &lt; mapLayout.length; y += 1) {</span>
+<span class="nc bnc" id="L276" title="All 2 branches missed.">            for (int x = 0; x &lt; mapLayout[y].length; x += 1) {</span>
+                // every tile is 32*32
+                // 40 pixels for the menu bar
+<span class="nc" id="L279">                int pixel_x = x * 32;</span>
+<span class="nc" id="L280">                int pixel_y = y * 32 + 40;</span>
+
+<span class="nc bnc" id="L282" title="All 2 branches missed.">                if (mapLayout[y][x] == ' ') {</span>
+<span class="nc" id="L283">                    app.image(mapElement.get(&quot;GRASS&quot;), pixel_x, pixel_y);</span>
+                }
+<span class="nc bnc" id="L285" title="All 2 branches missed.">                else if (mapLayout[y][x] == 'S') {</span>
+<span class="nc" id="L286">                    app.image(mapElement.get(&quot;SHRUB&quot;), pixel_x, pixel_y);</span>
+                }
+<span class="nc bnc" id="L288" title="All 2 branches missed.">                else if (mapLayout[y][x] == 'W') {</span>
+<span class="nc" id="L289">                    app.image(mapElement.get(&quot;GRASS&quot;), pixel_x, pixel_y);</span>
+                    // store the position of wizard house
+<span class="nc" id="L291">                    wizard_house_x = pixel_x;</span>
+<span class="nc" id="L292">                    wizard_house_y = pixel_y;</span>
+                }
+                else { // map the path
+<span class="nc" id="L295">                    char up = ' ', down = ' ', left = ' ', right = ' ';</span>
+
+                    // check map edge
+<span class="nc bnc" id="L298" title="All 2 branches missed.">                    if (y-1 &gt;= 0) { // check up edge</span>
+<span class="nc" id="L299">                        up = mapLayout[y-1][x];</span>
+                    }
+<span class="nc bnc" id="L301" title="All 2 branches missed.">                    if (y+1 &lt; 20) { // check down edge</span>
+<span class="nc" id="L302">                        down = mapLayout[y+1][x];</span>
+                    }
+<span class="nc bnc" id="L304" title="All 2 branches missed.">                    if (x-1 &gt;= 0) { // check left edge</span>
+<span class="nc" id="L305">                        left = mapLayout[y][x-1];</span>
+                    }
+<span class="nc bnc" id="L307" title="All 2 branches missed.">                    if (x+1 &lt; 20) { // check right edge</span>
+<span class="nc" id="L308">                       right = mapLayout[y][x+1]; </span>
+                    }
+
+<span class="nc bnc" id="L311" title="All 8 branches missed.">                    if (up == 'X' &amp;&amp; down == 'X' &amp;&amp; left == 'X' &amp;&amp; right == 'X') {</span>
+<span class="nc" id="L312">                        app.image(mapElement.get(&quot;PATH_CROSS&quot;), pixel_x, pixel_y);</span>
+                    }
+<span class="nc bnc" id="L314" title="All 6 branches missed.">                    else if (up == 'X' &amp;&amp; down == 'X' &amp;&amp; left == 'X') {</span>
+<span class="nc" id="L315">                        app.image(mapElement.get(&quot;PATH_T_LEFT&quot;), pixel_x, pixel_y);</span>
+                    }
+<span class="nc bnc" id="L317" title="All 6 branches missed.">                    else if (up == 'X' &amp;&amp; down == 'X' &amp;&amp; right == 'X') {</span>
+<span class="nc" id="L318">                        app.image(mapElement.get(&quot;PATH_T_RIGHT&quot;), pixel_x, pixel_y);</span>
+                    }
+<span class="nc bnc" id="L320" title="All 6 branches missed.">                    else if (up == 'X' &amp;&amp; left == 'X' &amp;&amp; right == 'X') {</span>
+<span class="nc" id="L321">                        app.image(mapElement.get(&quot;PATH_T_UP&quot;), pixel_x, pixel_y);</span>
+                    }
+<span class="nc bnc" id="L323" title="All 6 branches missed.">                    else if (down == 'X' &amp;&amp; left == 'X' &amp;&amp; right == 'X') {</span>
+<span class="nc" id="L324">                        app.image(mapElement.get(&quot;PATH_T_DOWN&quot;), pixel_x, pixel_y);</span>
+                    }
+<span class="nc bnc" id="L326" title="All 4 branches missed.">                    else if (up == 'X' &amp;&amp; left == 'X') {</span>
+<span class="nc" id="L327">                        app.image(mapElement.get(&quot;PATH_TURN_RD&quot;), pixel_x, pixel_y);</span>
+                    }
+<span class="nc bnc" id="L329" title="All 4 branches missed.">                    else if (down == 'X' &amp;&amp; left == 'X') {</span>
+<span class="nc" id="L330">                        app.image(mapElement.get(&quot;PATH_TURN_RU&quot;), pixel_x, pixel_y);</span>
+                    }
+<span class="nc bnc" id="L332" title="All 4 branches missed.">                    else if (up == 'X' &amp;&amp; right == 'X') {</span>
+<span class="nc" id="L333">                        app.image(mapElement.get(&quot;PATH_TURN_LD&quot;), pixel_x, pixel_y);</span>
+                    }
+<span class="nc bnc" id="L335" title="All 4 branches missed.">                    else if (down == 'X' &amp;&amp; right == 'X') {</span>
+<span class="nc" id="L336">                        app.image(mapElement.get(&quot;PATH_TURN_LU&quot;), pixel_x, pixel_y);</span>
+                    }
+<span class="nc bnc" id="L338" title="All 4 branches missed.">                    else if (up == 'X' || down == 'X') {</span>
+<span class="nc" id="L339">                        app.image(mapElement.get(&quot;PATH_VERTICAL&quot;), pixel_x, pixel_y);</span>
+                    }
+<span class="nc bnc" id="L341" title="All 4 branches missed.">                    else if (left == 'X' || right == 'X') {</span>
+<span class="nc" id="L342">                        app.image(mapElement.get(&quot;PATH_HORIZONTAL&quot;), pixel_x, pixel_y);</span>
+                    }
+                }
+            }
+        }
+<span class="nc" id="L347">	}</span>
+	
+
+    /**
+     * Draw and handle the countdown timer of the wave in the status bar.
+     */
+	public void drawTimer() {
+
+		// update the wave information
+<span class="nc bnc" id="L356" title="All 2 branches missed.">		if (currentWaveNumber &lt; totalWaveNumber) {</span>
+<span class="nc" id="L357">            currentWave = wavesList.get(currentWaveNumber);</span>
+<span class="nc bnc" id="L358" title="All 2 branches missed.">            if (currentWaveNumber + 1 &lt; totalWaveNumber) {</span>
+<span class="nc" id="L359">                nextWave = wavesList.get(currentWaveNumber + 1);</span>
+            } else {
+<span class="nc" id="L361">                nextWave = null;</span>
+            }
+        }
+<span class="nc bnc" id="L364" title="All 2 branches missed.">        if (nextWave != null) {</span>
+<span class="nc bnc" id="L365" title="All 2 branches missed.">            if (nextWave.hasStarted()) {</span>
+<span class="nc" id="L366">                currentWaveNumber += 1;</span>
+            }
+        }
+
+
+<span class="nc bnc" id="L371" title="All 2 branches missed.">        if (!buttonElement.get(&quot;P&quot;).isOn()) { // if the game is not paused</span>
+<span class="nc bnc" id="L372" title="All 2 branches missed.">	        if (currentWave.hasStarted()) {</span>
+<span class="nc bnc" id="L373" title="All 2 branches missed.">				if (currentWave.hasFinishedSpawning()) {</span>
+<span class="nc" id="L374">	                currentWave.setStarted(false);</span>
+	            } else {
+<span class="nc bnc" id="L376" title="All 2 branches missed.">	            	if (buttonElement.get(&quot;FF&quot;).isOn()) {</span>
+<span class="nc" id="L377">	            		currentWave.updateRemainingTime(</span>
+<span class="nc" id="L378">                            currentWave.getRemainingTime() - (2.0 / frameRate)</span>
+                        );
+	            	} else {
+<span class="nc" id="L381">	            		currentWave.updateRemainingTime(</span>
+<span class="nc" id="L382">                            currentWave.getRemainingTime() - (1.0 / frameRate)</span>
+                        );
+	            	}
+	            }
+<span class="nc bnc" id="L386" title="All 2 branches missed.">			} else if (nextWave != null) {</span>
+<span class="nc bnc" id="L387" title="All 2 branches missed.">				if (nextWave.hasFinishedPausing()) {</span>
+<span class="nc" id="L388">					nextWave.setStarted(true);</span>
+				} else {
+<span class="nc bnc" id="L390" title="All 2 branches missed.">					if (buttonElement.get(&quot;FF&quot;).isOn()) {</span>
+<span class="nc" id="L391">	            		nextWave.updateRemainingPause(</span>
+<span class="nc" id="L392">                            nextWave.getRemainingPause() - (2.0 / frameRate)</span>
+                        );
+	            	} else {
+<span class="nc" id="L395">	            		nextWave.updateRemainingPause(</span>
+<span class="nc" id="L396">                            nextWave.getRemainingPause() - (1.0 / frameRate)</span>
+                        );
+	            	}
+				}
+			}
+
+        }
+
+
+<span class="nc bnc" id="L405" title="All 2 branches missed.">		if (nextWave != null) {</span>
+<span class="nc" id="L406">        	app.textSize(20);</span>
+<span class="nc" id="L407">        	app.fill(0, 0, 0);</span>
+<span class="nc bnc" id="L408" title="All 2 branches missed.">            if (endless) {</span>
+<span class="nc" id="L409">                app.text(&quot;Next wave starts: &quot; + (int)(currentWave.getRemainingTime() + nextWave.getRemainingPause()) , 15, 30);</span>
+            } else {
+<span class="nc" id="L411">                app.text(&quot;Wave &quot; + nextWave.getWaveNumber() + &quot; starts: &quot; + (int)(currentWave.getRemainingTime() + nextWave.getRemainingPause()) , 15, 30);</span>
+            }
+		} else {
+<span class="nc bnc" id="L414" title="All 2 branches missed.">            if (endless) {</span>
+<span class="nc" id="L415">                readyForNextRound = true;</span>
+            }
+        } 
+<span class="nc" id="L418">    }</span>
+
+
+    /**
+     * Draw and handle the mana information in the status bar.
+     */
+    public void drawMana() {
+
+<span class="nc bnc" id="L426" title="All 2 branches missed.">        if (mana.getCurrentMana() &lt; 0) {</span>
+<span class="nc" id="L427">            gameLost = true;</span>
+<span class="nc" id="L428">            buttonElement.get(&quot;P&quot;).setButtonStatus(true);</span>
+        }
+
+<span class="nc" id="L431">        app.textSize(20);</span>
+<span class="nc" id="L432">        app.fill(0, 0, 0);</span>
+<span class="nc" id="L433">        app.text(&quot;MANA:&quot;, 345, 30);</span>
+<span class="nc" id="L434">        app.fill(255, 255, 255);</span>
+<span class="nc" id="L435">        app.rect(420, 10, 300, 20);</span>
+
+<span class="nc" id="L437">        app.fill(100, 149, 237);</span>
+<span class="nc bnc" id="L438" title="All 2 branches missed.">        if (!buttonElement.get(&quot;P&quot;).isOn()) { // if the game is not paused</span>
+<span class="nc bnc" id="L439" title="All 2 branches missed.">            if (buttonElement.get(&quot;FF&quot;).isOn()) {</span>
+<span class="nc" id="L440">                mana.increaseCurrentManaByTime((2.0 / frameRate));</span>
+            } else {
+<span class="nc" id="L442">                mana.increaseCurrentManaByTime((1.0 / frameRate));</span>
+            }
+        }
+<span class="nc" id="L445">        app.rect(420, 10, mana.getManaPercentage(), 20);</span>
+
+<span class="nc" id="L447">        app.textSize(20);</span>
+<span class="nc" id="L448">        app.fill(0, 0, 0);</span>
+<span class="nc" id="L449">        app.text((int)mana.getCurrentMana() + &quot;/&quot; + mana.getManaCap(), 520, 27);</span>
+
+<span class="nc bnc" id="L451" title="All 2 branches missed.">        if (buttonElement.get(&quot;M&quot;).isOn()) {</span>
+<span class="nc" id="L452">            mana.upgradeMana();</span>
+<span class="nc" id="L453">            buttonElement.get(&quot;M&quot;).updateStatus(); // switch the button off immediately</span>
+        }
+
+        // display upgrade cost
+<span class="nc" id="L457">        app.textSize(12);</span>
+<span class="nc" id="L458">        app.fill(10, 0, 0);</span>
+<span class="nc" id="L459">        app.text(mana.getManaPoolSpellCost(), 728, 463);</span>
+<span class="nc" id="L460">    }</span>
+
+
+    /**
+     * Draw and handle the buttons in the gameboard.
+     */
+    public void drawMenu() {
+
+<span class="nc bnc" id="L468" title="All 2 branches missed.">    	for (Map.Entry&lt;String, Button&gt; entry : buttonElement.entrySet()) {</span>
+<span class="nc" id="L469">    		Button button = entry.getValue();</span>
+    		
+    		// set whether the mouse is over the button
+<span class="nc" id="L472">    		button.updateMouseOver(checkMousePosition(button.getX(), button.getY(), 50, 50));</span>
+    	
+<span class="nc bnc" id="L474" title="All 2 branches missed.">	    	if (button.isOn()) {</span>
+<span class="nc" id="L475">				app.fill(255, 227, 132);</span>
+<span class="nc bnc" id="L476" title="All 2 branches missed.">			} else if (button.hasMouseOver()) {</span>
+<span class="nc" id="L477">				app.fill(128,128,128);</span>
+			} else {
+<span class="nc" id="L479">				app.noFill();</span>
+			}
+<span class="nc" id="L481">    		app.stroke(10, 0, 0);</span>
+<span class="nc" id="L482">			app.strokeWeight(3);</span>
+<span class="nc" id="L483">			app.rect(button.getX(), button.getY(), 50, 50);</span>
+
+<span class="nc" id="L485">			app.fill(10, 0, 0);</span>
+<span class="nc" id="L486">	        app.textSize(30);</span>
+<span class="nc" id="L487">	        app.text(button.getName(), 650, button.getY() + 37);</span>
+
+<span class="nc" id="L489">	        app.fill(10, 0, 0);</span>
+<span class="nc" id="L490">	        app.textSize(12);</span>
+<span class="nc" id="L491">	        app.text(button.getDesciption(), 698, button.getY() + 20);</span>
+<span class="nc" id="L492">    	}</span>
+<span class="nc" id="L493">    }</span>
+
+
+    /**
+     * Draw and handle the monsters in the gameboard.
+     */
+    public void drawMonster() {
+
+        // spawn new monsters
+<span class="nc bnc" id="L502" title="All 2 branches missed.">        if (!buttonElement.get(&quot;P&quot;).isOn()) {</span>
+            // update the spawn interval
+<span class="nc bnc" id="L504" title="All 2 branches missed.">            if (buttonElement.get(&quot;FF&quot;).isOn()) {</span>
+<span class="nc" id="L505">                currentWave.updateSpawnInterval(2.0 / frameRate);</span>
+            } else {
+<span class="nc" id="L507">                currentWave.updateSpawnInterval(1.0 / frameRate);</span>
+            }
+            // spawn a random monster
+<span class="nc bnc" id="L510" title="All 2 branches missed.">            if (currentWave.isReadyToSpawn()) {</span>
+<span class="nc bnc" id="L511" title="All 2 branches missed.">                if (currentWave.hasRemainingMonster()) {</span>
+<span class="nc" id="L512">                    Monster m = currentWave.getRandomMonster();</span>
+<span class="nc" id="L513">                    Monster monster = new Monster(</span>
+<span class="nc" id="L514">                        m.getType(),</span>
+<span class="nc" id="L515">                        m.getImage(),</span>
+<span class="nc" id="L516">                        m.getDeathAnimation(),</span>
+<span class="nc" id="L517">                        m.getFullHp(),</span>
+<span class="nc" id="L518">                        m.getSpeed(),</span>
+<span class="nc" id="L519">                        m.getArmour(),</span>
+<span class="nc" id="L520">                        m.getManaGainedOnKill(),</span>
+                        mapLayout
+                    );
+<span class="nc" id="L523">                    currentMonsterList.add(monster);</span>
+                }
+            }
+        }
+
+<span class="nc" id="L528">        List&lt;Monster&gt; toRemove = new ArrayList&lt;&gt;();</span>
+        
+<span class="nc bnc" id="L530" title="All 2 branches missed.">        if (currentMonsterList.size() &gt; 0) {</span>
+<span class="nc bnc" id="L531" title="All 2 branches missed.">            for (Monster monster : currentMonsterList) {</span>
+                // draw monster image
+<span class="nc" id="L533">                app.image(monster.getImage(), monster.getPosition()[0], monster.getPosition()[1]);</span>
+                
+                // draw hp bar
+<span class="nc" id="L536">                app.fill(255, 0, 0);</span>
+<span class="nc" id="L537">                app.noStroke();</span>
+<span class="nc" id="L538">                app.rect(monster.getPosition()[0] - 5, monster.getPosition()[1] - 7, 29, 3);</span>
+<span class="nc" id="L539">                app.fill(0, 255, 0);</span>
+<span class="nc" id="L540">                app.noStroke();</span>
+<span class="nc" id="L541">                app.rect(monster.getPosition()[0] - 5, monster.getPosition()[1] - 7, monster.getHpPercentage(), 3);</span>
+
+<span class="nc bnc" id="L543" title="All 2 branches missed.">                if (monster.isDying()) {</span>
+                    // if the monster is dying, stop moving and draw death animation
+<span class="nc bnc" id="L545" title="All 2 branches missed.">                    if (!buttonElement.get(&quot;P&quot;).isOn()) {</span>
+<span class="nc" id="L546">                        monster.updateDyingImage();</span>
+                    }
+                } else {
+                    // move the monster
+<span class="nc bnc" id="L550" title="All 2 branches missed.">                    if (!buttonElement.get(&quot;P&quot;).isOn()) {</span>
+<span class="nc bnc" id="L551" title="All 2 branches missed.">                        if (buttonElement.get(&quot;FF&quot;).isOn()) {</span>
+<span class="nc" id="L552">                            monster.move((float)(monster.getSpeed()/32));</span>
+                        }
+<span class="nc" id="L554">                        monster.move((float)(monster.getSpeed()/32));</span>
+                    }
+                }
+                
+                // check whether the monster reaches the wizard house
+                // deduct mana and banish monster
+<span class="nc bnc" id="L560" title="All 2 branches missed.">                if (monster.hasReachedWizardHouse()) {</span>
+<span class="nc" id="L561">                    mana.decreaseCurrentMana(monster.getCurrentHp());</span>
+<span class="nc" id="L562">                    monster.banishMonster();</span>
+                }
+
+                // if the monster is dead, add that monster to the removal list
+<span class="nc bnc" id="L566" title="All 2 branches missed.">                if (monster.isDead()) {</span>
+<span class="nc" id="L567">                    toRemove.add(monster);</span>
+<span class="nc" id="L568">                    mana.increaseCurrentMana(monster.getManaGainedOnKill());</span>
+                }
+<span class="nc" id="L570">            }</span>
+        }
+
+        // remove dead monster
+<span class="nc bnc" id="L574" title="All 2 branches missed.">        for (Monster monsterToRemove : toRemove) {</span>
+<span class="nc" id="L575">            Iterator&lt;Monster&gt; iterator = currentMonsterList.iterator();</span>
+<span class="nc bnc" id="L576" title="All 2 branches missed.">            while (iterator.hasNext()) {</span>
+<span class="nc" id="L577">                Monster m = iterator.next();</span>
+<span class="nc bnc" id="L578" title="All 2 branches missed.">                if (m == monsterToRemove) {</span>
+<span class="nc" id="L579">                    iterator.remove();</span>
+<span class="nc" id="L580">                    break;</span>
+                }
+<span class="nc" id="L582">            }</span>
+<span class="nc" id="L583">        }</span>
+<span class="nc" id="L584">    }</span>
+
+
+    /**
+     * Draw and handle the towers and bullets in the gameboard.
+     */
+    public void drawTowerBullet() {
+
+<span class="nc bnc" id="L592" title="All 2 branches missed.">        if (currentTowerList.size() &gt; 0) {</span>
+<span class="nc bnc" id="L593" title="All 2 branches missed.">            for (Tower tower : currentTowerList) {</span>
+                
+                // draw tower image
+<span class="nc" id="L596">                tower.updateImage();</span>
+<span class="nc" id="L597">                app.image(tower.getImage(), tower.getPosition()[0], tower.getPosition()[1]);</span>
+                
+                // draw upgrade images and features
+<span class="nc bnc" id="L600" title="All 2 branches missed.">                if (tower.getUpgradeLevel('s') != 0) {</span>
+<span class="nc" id="L601">                    app.strokeWeight(tower.getUpgradeLevel('s') + 0.5f);</span>
+<span class="nc" id="L602">                    app.stroke(173, 216, 230);</span>
+<span class="nc" id="L603">                    app.noFill();</span>
+<span class="nc" id="L604">                    app.rect(tower.getPosition()[0] + 5, tower.getPosition()[1] + 5, 20, 20);</span>
+<span class="nc" id="L605">                    app.stroke(0, 0, 0);</span>
+<span class="nc" id="L606">                    app.strokeWeight(1);</span>
+                }
+<span class="nc bnc" id="L608" title="All 2 branches missed.">                for (int i = 0; i &lt; tower.getUpgradeLevel('r'); i += 1) {</span>
+<span class="nc" id="L609">                    app.noFill();</span>
+<span class="nc" id="L610">                    app.stroke(218, 112, 214);</span>
+<span class="nc" id="L611">                    app.strokeWeight(2);</span>
+<span class="nc" id="L612">                    app.ellipse(tower.getPosition()[0] + 6 + i * 10,tower.getPosition()[1] + 5, 5, 5);</span>
+<span class="nc" id="L613">                    app.stroke(0, 0, 0);</span>
+<span class="nc" id="L614">                    app.strokeWeight(1);</span>
+                }
+<span class="nc bnc" id="L616" title="All 2 branches missed.">                for (int i = 0; i &lt; tower.getUpgradeLevel('d'); i += 1) {</span>
+<span class="nc" id="L617">                    app.fill(218, 112, 214);</span>
+<span class="nc" id="L618">                    app.textSize(10);</span>
+<span class="nc" id="L619">                    app.text(&quot;X&quot;, tower.getPosition()[0] + 3 + i * 10, tower.getPosition()[1] + 30);</span>
+                }
+
+                // draw tower range
+<span class="nc bnc" id="L623" title="All 2 branches missed.">                if (tower.isOver(app.mouseX, app.mouseY)) {</span>
+<span class="nc" id="L624">                    app.noFill();</span>
+<span class="nc" id="L625">                    app.stroke(255, 255, 0);</span>
+<span class="nc" id="L626">                    app.strokeWeight(2);</span>
+<span class="nc" id="L627">                    app.ellipse(tower.getPosition()[0]+32/2, tower.getPosition()[1]+32/2, tower.getRange()*2, tower.getRange()*2);</span>
+<span class="nc" id="L628">                    app.stroke(0, 0, 0);</span>
+<span class="nc" id="L629">                    app.strokeWeight(1);</span>
+                }
+
+                // attack monster
+<span class="nc bnc" id="L633" title="All 2 branches missed.">                if (currentMonsterList.size() &gt; 0) {</span>
+
+                    // select a random monster to attack
+<span class="nc" id="L636">                    Random random = new Random();</span>
+<span class="nc" id="L637">                    int randomIndex = random.nextInt(currentMonsterList.size());</span>
+<span class="nc" id="L638">                    Monster randomMonster = currentMonsterList.get(randomIndex);</span>
+
+                    // get the distance between the monster and the tower
+<span class="nc" id="L641">                    float distance = app.dist(tower.getPosition()[0], tower.getPosition()[1], randomMonster.getPosition()[0], randomMonster.getPosition()[1]);</span>
+                    
+                    // update fire cooldown
+<span class="nc bnc" id="L644" title="All 2 branches missed.">                    if (!buttonElement.get(&quot;P&quot;).isOn()) {</span>
+<span class="nc bnc" id="L645" title="All 2 branches missed.">                        if (buttonElement.get(&quot;FF&quot;).isOn()) {</span>
+<span class="nc" id="L646">                            tower.updateFireCoolDown(2.0 / frameRate);</span>
+                        } else {
+<span class="nc" id="L648">                            tower.updateFireCoolDown(1.0 / frameRate);</span>
+                        }
+                    }
+
+                    // if the monster is in the range and cd is ready, attack the monster
+<span class="nc bnc" id="L653" title="All 4 branches missed.">                    if (distance &lt; tower.getRange() &amp;&amp; tower.isReadyToFire()) {</span>
+<span class="nc" id="L654">                        tower.fire(randomMonster);</span>
+                    }
+                }
+
+<span class="nc" id="L658">                List&lt;Bullet&gt; toRemove = new ArrayList&lt;&gt;();</span>
+
+                // draw bullet
+<span class="nc bnc" id="L661" title="All 2 branches missed.">                if (tower.getBulletList().size() &gt; 0) {</span>
+<span class="nc bnc" id="L662" title="All 2 branches missed.">                    for (Bullet bullet : tower.getBulletList()) {</span>
+
+                        // move the bullet
+<span class="nc bnc" id="L665" title="All 2 branches missed.">                        if (!buttonElement.get(&quot;P&quot;).isOn()) {</span>
+<span class="nc" id="L666">                            bullet.move(buttonElement.get(&quot;FF&quot;).isOn());</span>
+                        }
+
+                        // check whether the bullet can make damage
+<span class="nc" id="L670">                        bullet.makeDamage();</span>
+
+                        // check if the target monster is dead or lost
+<span class="nc" id="L673">                        bullet.checkTargetLost();</span>
+
+                        // if the bullet is still valid, draw the bullet
+                        // if the bullet loses its target, remove it from the gameboard
+<span class="nc bnc" id="L677" title="All 2 branches missed.">                        if (! bullet.isHide()) {</span>
+<span class="nc" id="L678">                            app.image(bullet.getImage(), bullet.getPosition()[0], bullet.getPosition()[1]);</span>
+                        } else {
+<span class="nc" id="L680">                            toRemove.add(bullet);</span>
+                        }
+<span class="nc" id="L682">                    }</span>
+                }
+
+                // remove bullet
+<span class="nc bnc" id="L686" title="All 2 branches missed.">                for (Bullet bulletToRemove : toRemove) {</span>
+<span class="nc" id="L687">                    Iterator&lt;Bullet&gt; iterator = tower.getBulletList().iterator();</span>
+<span class="nc bnc" id="L688" title="All 2 branches missed.">                    while (iterator.hasNext()) {</span>
+<span class="nc" id="L689">                        Bullet b = iterator.next();</span>
+<span class="nc bnc" id="L690" title="All 2 branches missed.">                        if (b == bulletToRemove) {</span>
+<span class="nc" id="L691">                            iterator.remove();</span>
+<span class="nc" id="L692">                            break;</span>
+                        }
+<span class="nc" id="L694">                    }</span>
+<span class="nc" id="L695">                }</span>
+<span class="nc" id="L696">            }</span>
+        }
+<span class="nc" id="L698">    }</span>
+
+
+    /**
+     * Draw and handle the tower upgrade information in the menu bar.
+     */
+    public void drawTowerUpgradeInfo() {
+
+<span class="nc bnc" id="L706" title="All 2 branches missed.">        if (currentTowerList.size() &gt; 0) {</span>
+<span class="nc bnc" id="L707" title="All 2 branches missed.">            for (Tower tower : currentTowerList) {</span>
+<span class="nc bnc" id="L708" title="All 2 branches missed.">                if (tower.isOver(app.mouseX, app.mouseY)) {   </span>
+                    // draw upgrade details
+<span class="nc" id="L710">                    app.textSize(10);</span>
+<span class="nc" id="L711">                    app.fill(255, 255, 255);</span>
+<span class="nc" id="L712">                    app.rect(650, 540, 90, 20);</span>
+<span class="nc" id="L713">                    app.rect(650, 560, 90, 60);</span>
+<span class="nc" id="L714">                    app.rect(650, 620, 90, 20);</span>
+<span class="nc" id="L715">                    app.fill(0, 0, 0);</span>
+
+<span class="nc" id="L717">                    int rangeFee = 0, speedFee = 0, damageFee = 0;</span>
+<span class="nc bnc" id="L718" title="All 2 branches missed.">                    if (buttonElement.get(&quot;U1&quot;).isOn()) {</span>
+<span class="nc" id="L719">                        rangeFee = tower.getUpgradeCost('r');</span>
+                    }
+<span class="nc bnc" id="L721" title="All 2 branches missed.">                    if (buttonElement.get(&quot;U2&quot;).isOn()) {</span>
+<span class="nc" id="L722">                        speedFee = tower.getUpgradeCost('s');</span>
+                    }
+<span class="nc bnc" id="L724" title="All 2 branches missed.">                    if (buttonElement.get(&quot;U3&quot;).isOn()) {</span>
+<span class="nc" id="L725">                        damageFee = tower.getUpgradeCost('d');</span>
+                    }
+<span class="nc" id="L727">                    app.text(&quot;Upgrade cost&quot;, 655, 555);</span>
+<span class="nc" id="L728">                    app.text(&quot;range:\t&quot; + rangeFee, 655, 575);</span>
+<span class="nc" id="L729">                    app.text(&quot;speed:\t&quot; + speedFee, 655, 595);</span>
+<span class="nc" id="L730">                    app.text(&quot;damage:\t&quot; + damageFee, 655, 615);</span>
+<span class="nc" id="L731">                    app.text(&quot;Total:\t&quot; + (rangeFee+speedFee+damageFee), 655, 635);</span>
+                }
+<span class="nc" id="L733">            }</span>
+        }
+<span class="nc" id="L735">    }</span>
+
+
+    /**
+     * Draw the wizard house.
+     */
+    public void drawWizardHouse() {
+<span class="nc" id="L742">        app.image(mapElement.get(&quot;WIZARD_HOUSE&quot;), wizard_house_x, wizard_house_y - 8);</span>
+<span class="nc" id="L743">    }</span>
+
+
+    /**
+     * Draw the game lost message bar.
+     */
+    public void drawGameLost() {
+<span class="nc" id="L750">        app.stroke(0, 0, 0);</span>
+<span class="nc" id="L751">        app.strokeWeight(3);</span>
+<span class="nc" id="L752">        app.fill(137, 115, 76);</span>
+<span class="nc" id="L753">        app.rect(150, 230, 340, 200);</span>
+<span class="nc" id="L754">        app.fill(0, 0, 0);</span>
+<span class="nc" id="L755">        app.textSize(30);</span>
+<span class="nc" id="L756">        app.text(&quot;You LOST&quot;, 245, 310);</span>
+<span class="nc" id="L757">        app.textSize(20);</span>
+<span class="nc" id="L758">        app.text(&quot;press 'r' to restart&quot;, 230, 340);</span>
+<span class="nc" id="L759">        app.textSize(20);</span>
+<span class="nc" id="L760">        app.text(&quot;press 'b' to return the menu&quot;, 180, 370);</span>
+<span class="nc" id="L761">    }</span>
+
+
+    /**
+     * Draws the game win message bar.
+     */
+    public void drawGameWin() {
+<span class="nc" id="L768">        app.stroke(0, 0, 0);</span>
+<span class="nc" id="L769">        app.strokeWeight(3);</span>
+<span class="nc" id="L770">        app.fill(137, 115, 76);</span>
+<span class="nc" id="L771">        app.rect(150, 230, 340, 200);</span>
+<span class="nc" id="L772">        app.fill(0, 0, 0);</span>
+<span class="nc" id="L773">        app.textSize(30);</span>
+<span class="nc" id="L774">        app.text(&quot;You WIN&quot;, 250, 310);</span>
+<span class="nc" id="L775">        app.textSize(20);</span>
+<span class="nc" id="L776">        app.text(&quot;press any key to return the menu&quot;, 160, 340);</span>
+<span class="nc" id="L777">    }</span>
+
+
+    /**
+     * Check whether the game is won.
+     * 
+     * The game will win if:
+     * 1. it is the last wave
+     * 2. the wave is finish
+     * 3. no remaining monsters in the gameboard
+     * 4. no monster to be spawned in the current wave
+     * 
+     * @return A boolean that the game is won or not.
+     */
+    public boolean isGameWin() {
+<span class="nc bnc" id="L792" title="All 2 branches missed.">        return (</span>
+            currentWaveNumber + 1 == totalWaveNumber &amp;&amp; 
+<span class="nc bnc" id="L794" title="All 2 branches missed.">            (int)currentWave.getRemainingTime() == 0 &amp;&amp; </span>
+<span class="nc bnc" id="L795" title="All 2 branches missed.">            currentMonsterList.size() == 0 &amp;&amp; </span>
+<span class="nc bnc" id="L796" title="All 2 branches missed.">            !currentWave.hasRemainingMonster()</span>
+        );
+    }
+
+
+    /**
+     * Check whether the game is lost.
+     * 
+     * @return A boolean that the game is lost or not.
+     */
+    public boolean isGameLost() {
+<span class="nc" id="L807">        return gameLost;</span>
+    }
+
+
+    /**
+     * Build new tower in the gameboard.
+     */
+    public void buildNewTower() {
+
+<span class="nc" id="L816">        int cost = towerCost;</span>
+
+        // update cost based on the upgrade selections
+<span class="nc bnc" id="L819" title="All 2 branches missed.">        if (buttonElement.get(&quot;U1&quot;).isOn()) {</span>
+<span class="nc" id="L820">            cost += 20;</span>
+        }
+<span class="nc bnc" id="L822" title="All 2 branches missed.">        if (buttonElement.get(&quot;U2&quot;).isOn()) {</span>
+<span class="nc" id="L823">            cost += 20;</span>
+        }
+<span class="nc bnc" id="L825" title="All 2 branches missed.">        if (buttonElement.get(&quot;U3&quot;).isOn()) {</span>
+<span class="nc" id="L826">            cost += 20;</span>
+        }
+
+        // build tower if the mana is enough and the mouse is in the gameboard
+<span class="nc bnc" id="L830" title="All 4 branches missed.">        if (mana.getCurrentMana() &gt;= cost &amp;&amp; (mapLayout[(int)(app.mouseY-40)/32][(int)app.mouseX/32] == ' ')) {</span>
+            
+            // check whether there has already exist a tower or not
+<span class="nc bnc" id="L833" title="All 2 branches missed.">            if (currentTowerList.size() &gt; 0) {</span>
+<span class="nc bnc" id="L834" title="All 2 branches missed.">                for (Tower tower : currentTowerList) {</span>
+<span class="nc bnc" id="L835" title="All 2 branches missed.">                    if (tower.isOver(app.mouseX, app.mouseY)) {</span>
+<span class="nc" id="L836">                        return;</span>
+                    }
+<span class="nc" id="L838">                }</span>
+            }
+
+            // build a new tower
+<span class="nc" id="L842">            Tower tower = new Tower(app.mouseX, app.mouseY, initialTowerRange, initialTowerFiringSpeed, initialTowerDamage, towerElement, bulletImage);</span>
+            
+            // upgrade tower
+<span class="nc bnc" id="L845" title="All 2 branches missed.">            if (buttonElement.get(&quot;U1&quot;).isOn()) {</span>
+<span class="nc" id="L846">                tower.upgradeTower('r');</span>
+            }
+<span class="nc bnc" id="L848" title="All 2 branches missed.">            if (buttonElement.get(&quot;U2&quot;).isOn()) {</span>
+<span class="nc" id="L849">                tower.upgradeTower('s');</span>
+            }
+<span class="nc bnc" id="L851" title="All 2 branches missed.">            if (buttonElement.get(&quot;U3&quot;).isOn()) {</span>
+<span class="nc" id="L852">                tower.upgradeTower('d');</span>
+            }
+
+            // add the tower to the tower list
+<span class="nc" id="L856">            currentTowerList.add(tower);</span>
+
+            // deduct the mana
+<span class="nc" id="L859">            mana.decreaseCurrentMana(towerCost);</span>
+        }
+<span class="nc" id="L861">        buttonElement.get(&quot;T&quot;).setButtonStatus(false);</span>
+<span class="nc" id="L862">        buttonElement.get(&quot;U1&quot;).setButtonStatus(false);</span>
+<span class="nc" id="L863">        buttonElement.get(&quot;U2&quot;).setButtonStatus(false);</span>
+<span class="nc" id="L864">        buttonElement.get(&quot;U3&quot;).setButtonStatus(false);</span>
+<span class="nc" id="L865">    }</span>
+
+
+    /**
+     * Handles the tower upgrades.
+     */
+    public void upgradeTower() {
+        
+<span class="nc bnc" id="L873" title="All 2 branches missed.">        if (currentTowerList.size() &gt; 0) {</span>
+<span class="nc bnc" id="L874" title="All 2 branches missed.">            for (Tower tower : currentTowerList) {</span>
+
+                // check whether a tower is selected
+<span class="nc bnc" id="L877" title="All 2 branches missed.">                if (tower.isOver(app.mouseX, app.mouseY)) {</span>
+                    
+<span class="nc" id="L879">                    int upgradeCost = 0;</span>
+
+                    // update cost based on the upgrade selections
+<span class="nc bnc" id="L882" title="All 2 branches missed.">                    if (buttonElement.get(&quot;U1&quot;).isOn()) {</span>
+<span class="nc" id="L883">                        upgradeCost += tower.getUpgradeCost('r');</span>
+                    }
+<span class="nc bnc" id="L885" title="All 2 branches missed.">                    if (buttonElement.get(&quot;U2&quot;).isOn()) {</span>
+<span class="nc" id="L886">                        upgradeCost += tower.getUpgradeCost('s');</span>
+                    }
+<span class="nc bnc" id="L888" title="All 2 branches missed.">                    if (buttonElement.get(&quot;U3&quot;).isOn()) {</span>
+<span class="nc" id="L889">                        upgradeCost += tower.getUpgradeCost('d');</span>
+                    }
+
+                    // upgrade tower if the mana is enough
+<span class="nc bnc" id="L893" title="All 2 branches missed.">                    if (mana.getCurrentMana() &gt;= upgradeCost) {</span>
+<span class="nc bnc" id="L894" title="All 2 branches missed.">                        if (buttonElement.get(&quot;U1&quot;).isOn()) {</span>
+<span class="nc" id="L895">                            tower.upgradeTower('r');</span>
+                        }
+<span class="nc bnc" id="L897" title="All 2 branches missed.">                        if (buttonElement.get(&quot;U2&quot;).isOn()) {</span>
+<span class="nc" id="L898">                            tower.upgradeTower('s');</span>
+                        }
+<span class="nc bnc" id="L900" title="All 2 branches missed.">                        if (buttonElement.get(&quot;U3&quot;).isOn()) {</span>
+<span class="nc" id="L901">                            tower.upgradeTower('d');</span>
+                        }
+
+                        // deduct the mana
+<span class="nc" id="L905">                        mana.decreaseCurrentMana(upgradeCost);</span>
+                    } else {
+                        // the upgrade button will be switched off when mana is not enough
+<span class="nc" id="L908">                        buttonElement.get(&quot;T&quot;).setButtonStatus(false);</span>
+<span class="nc" id="L909">                        buttonElement.get(&quot;U1&quot;).setButtonStatus(false);</span>
+<span class="nc" id="L910">                        buttonElement.get(&quot;U2&quot;).setButtonStatus(false);</span>
+<span class="nc" id="L911">                        buttonElement.get(&quot;U3&quot;).setButtonStatus(false);</span>
+                    }
+                }
+<span class="nc" id="L914">            }</span>
+        } 
+<span class="nc" id="L916">    }</span>
+
+
+    /**
+     * Check whether the game is ready for the next round in the endless mode.
+     * 
+     * @return A boolean that indicate the next round status.
+     */
+    public boolean isReadyForNextRound() {
+<span class="nc" id="L925">        return readyForNextRound;</span>
+    }
+
+
+    /**
+     * Updates the next round status.
+     */
+    public void updateReadyForNextRound() {
+<span class="nc" id="L933">        readyForNextRound = false;</span>
+<span class="nc" id="L934">    }</span>
+
+
+    /**
+     * Get the current wave list for the endless mode to upgrade the wave.
+     * 
+     * @return Current wave list.
+     */
+    public List&lt;Wave&gt; getWavesList() {
+<span class="nc" id="L943">        return wavesList;</span>
+    }
+
+
+    /**
+     * Updates the game in the endless mode by making the next wave harder.
+     * 
+     * @param updatedWavesList the next five waves
+     */
+    public void updateEndlessInformation(List&lt;Wave&gt; updatedWavesList) {
+
+<span class="nc" id="L954">        wavesList = updatedWavesList;</span>
+
+<span class="nc" id="L956">        currentWaveNumber = 0;</span>
+<span class="nc" id="L957">        totalWaveNumber = wavesList.size();</span>
+<span class="nc" id="L958">    }</span>
+}
+
+
+</pre><div class="footer"><span class="right">Created with <a href="http://www.jacoco.org/jacoco">JaCoCo</a> 0.8.9.202303310957</span></div></body></html>
