@@ -5,6 +5,12 @@ import java.io.*;
 import java.util.*;
 
 
+/**
+ * Tower has the ability to attack monster using its bullet.
+ * 
+ * @author Junrui Kang
+ * @version 1.0.0
+ */
 public class Tower {
 
 	private int x;
@@ -58,17 +64,31 @@ public class Tower {
 	}
 
 
+	/**
+	 * Set the position of the tower based on the mouse position.
+	 * 
+	 * @param xPos the pixel coordinate for x
+	 * @param yPos the pixel coordinate for y
+	 */
 	public void setPosition(float xPos, float yPos) {
 		x = (int) xPos/32;
 		y = (int) (yPos-40)/32;
 	}
 
 
+    /**
+     * Get the image of the tower.
+     * 
+     * @return tower image
+     */
 	public PImage getImage() {
 		return image;
 	}
 
 
+    /**
+     * Update the image of the tower based on the upgrade level.
+     */
 	public void updateImage() {
 		if (rangeLevel >= 7 && speedLevel >= 7 && damageLevel >= 7) {
 		    image = imageList.get(7);
@@ -95,21 +115,44 @@ public class Tower {
 	}
 
 
+    /**
+     * Get the position of the tower.
+     * 
+     * @return tower position in {x,y}
+     */
 	public float[] getPosition() {
         return new float[]{x * 32, y * 32 + 40};
     }
 
 
+    /**
+     * Check whether the given position is the same as this tower.
+     * 
+	 * @param xPos the pixel coordinate for x
+	 * @param yPos the pixel coordinate for y
+     * @return whether the given position is the same as this tower
+     */
     public boolean isOver(float xPos, float yPos) {
     	return ((x == (int)(xPos/32)) && (y == (int)((yPos-40)/32)));
     }
 
 
+    /**
+     * Get the range of the tower.
+     * 
+     * @return tower range
+     */
     public int getRange() {
     	return range;
     }
 
 
+    /**
+     * Get the upgrade cost of a specific level of the tower.
+     * 
+     * @param toUpgrade the specific upgrade part (range, speed, damage)
+     * @return upgrade cost
+     */
     public int getUpgradeCost(char toUpgrade) {
 
     	int cost = 0;
@@ -130,6 +173,11 @@ public class Tower {
     }
 
 
+    /**
+     * Upgrade the tower (range, speed, damage)
+     * 
+     * @param toUpgrade the specific upgrade part (range, speed, damage)
+     */
     public void upgradeTower(char toUpgrade) {
     	switch (toUpgrade) {
         case 'r':
@@ -148,6 +196,12 @@ public class Tower {
     }
 
 
+    /**
+     * Get the tower upgrade level (range, speed, damage)
+     * 
+     * @param toCheck the specific upgrade part (range, speed, damage)
+     * @return the corresponding level
+     */
     public int getUpgradeLevel(char toCheck) {
     	int level = 0;
 
@@ -167,6 +221,13 @@ public class Tower {
     }
 
 
+    /**
+     * The tower will fire a bullet to the given target.
+     * 
+     * A bullet object will be instantiated here.
+     * 
+     * @param target monster to attack
+     */
     public void fire(Monster target) {
     	Bullet bullet = new Bullet(this.getPosition()[0], this.getPosition()[1], damage, target, bulletImage);
     	bulletList.add(bullet);
@@ -174,16 +235,31 @@ public class Tower {
     }
 
 
+    /**
+     * Reduce the fire cooldown by a given time.
+     * 
+     * @param time time to reduce the fire cooldown
+     */
     public void updateFireCoolDown(double time) {
     	fireCoolDown -= time;
     }
 
 
+    /**
+     * Check whether the fire cooldown is 0.
+     * 
+     * @return whether the tower is ready to fire
+     */
     public boolean isReadyToFire() {
     	return (fireCoolDown <= 0);
     }
 
 
+    /**
+     * Get the current bullet list of the tower for the game to draw.
+     * 
+     * @return bullet list
+     */
     public List<Bullet> getBulletList() {
     	return bulletList;
     }

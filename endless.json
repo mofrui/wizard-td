@@ -2,8 +2,8 @@
   "layout": "level3.txt",
   "waves": [
     {
-      "duration": 1,
-      "pre_wave_pause": 2,
+      "duration": 5,
+      "pre_wave_pause": 5,
     "monsters": [
         {
           "type": "gremlin",
@@ -24,7 +24,7 @@
         {
           "type": "worm",
           "hp": 10,
-          "speed": 2,
+          "speed": 4,
           "armour": 0.1,
           "mana_gained_on_kill": 2,
           "quantity": 1
@@ -32,13 +32,13 @@
     ]
     },
     {
-      "duration": 3,
-      "pre_wave_pause": 3,
+      "duration": 5,
+      "pre_wave_pause": 5,
       "monsters": [
         {
           "type": "gremlin",
           "hp": 15,
-          "speed": 1.5,
+          "speed": 2,
           "armour": 0.1,
           "mana_gained_on_kill": 4,
           "quantity": 2
@@ -54,7 +54,7 @@
         {
           "type": "worm",
           "hp": 20,
-          "speed": 2,
+          "speed": 4,
           "armour": 0.1,
           "mana_gained_on_kill": 4,
           "quantity": 2
@@ -62,7 +62,7 @@
       ]
     },
     {
-      "duration": 4,
+      "duration": 5,
       "pre_wave_pause": 5,
       "monsters": [
         {
@@ -84,7 +84,7 @@
         {
           "type": "worm",
           "hp": 20,
-          "speed": 2,
+          "speed": 4,
           "armour": 0.3,
           "mana_gained_on_kill": 6,
           "quantity": 2
@@ -122,32 +122,16 @@
       ]
     },
     {
-      "duration": 7,
-      "pre_wave_pause": 6,
+      "duration": 10,
+      "pre_wave_pause": 10,
       "monsters": [
         {
-          "type": "gremlin",
-          "hp": 40,
-          "speed": 2,
-          "armour": 0.1,
-          "mana_gained_on_kill": 10,
-          "quantity": 3
-        },
-        {
           "type": "beetle",
-          "hp": 30,
+          "hp": 100,
           "speed": 1,
-          "armour": 0.2,
-          "mana_gained_on_kill": 10,
-          "quantity": 3
-        },
-        {
-          "type": "worm",
-          "hp": 35,
-          "speed": 2,
           "armour": 0.1,
           "mana_gained_on_kill": 10,
-          "quantity": 5
+          "quantity": 1
         }
       ]
     }
@@ -155,7 +139,7 @@
   "initial_tower_range": 96,
   "initial_tower_firing_speed": 1.5,
   "initial_tower_damage": 40,
-  "initial_mana": 250,
+  "initial_mana": 300,
   "initial_mana_cap": 1000,
   "initial_mana_gained_per_second": 2,
   "tower_cost": 100,

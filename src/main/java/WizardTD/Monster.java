@@ -5,6 +5,12 @@ import java.io.*;
 import java.util.*;
 
 
+/**
+ * Monster will be spawned in the game, and move along to path to the Wizard House.
+ * 
+ * @author Junrui Kang
+ * @version 1.0.0
+ */
 public class Monster {
 	
 	private String type;
@@ -59,56 +65,111 @@ public class Monster {
     }
 
 
+    /**
+     * Get the type of the monster.
+     * 
+     * @return monster type
+     */
 	public String getType() {
         return type;
     }
 
 
+    /**
+     * Get the full hp of the monster.
+     * 
+     * @return full hp
+     */
 	public int getFullHp() {
 		return fullHp;
     }
 
 
+    /**
+     * Get the current hp of the monster.
+     * 
+     * @return current hp
+     */
 	public int getCurrentHp() {
 		return currentHp;
     }
 
 
+    /**
+     * Get the speed of the monster.
+     * 
+     * @return monster speed
+     */
 	public double getSpeed() {
 		return speed;
     }
 
 
+    /**
+     * Get the armour of the monster.
+     * 
+     * @return monster armour
+     */
     public double getArmour() {
         return armour;
     }
 
 
+    /**
+     * Get the amount of mana when the monster is killed.
+     * 
+     * @return mana gained on kill
+     */
     public int getManaGainedOnKill() {
         return manaGainedOnKill;
     }
 
 
+    /**
+     * Get the position of the monster.
+     * 
+     * @return monster position in {x,y}
+     */
     public float[] getPosition() {
         return new float[]{x * 32 + 5, y * 32 + 45};
     }
 
 
+    /**
+     * Get the image of the monster.
+     * 
+     * @return monster image
+     */
     public PImage getImage() {
         return image;
     }
 
 
+    /**
+     * Get the death animatopn of the monster.
+     * 
+     * @return monster death animation in a list
+     */
     public List<PImage> getDeathAnimation() {
         return deathAnimation;
     }
 
 
+    /**
+     * Get the percentage of hp out of full hp of the monster.
+     * 
+     * @return percentage of hp
+     */
     public float getHpPercentage() {
         return ((int)currentHp * 29 / fullHp);
     }
 
 
+    /**
+     * Monster's hp will be decreased when it takes damage.
+     * 
+     * @param damage damage taken
+     */
     public void takeDamage(int damage) {
         currentHp -= armour * damage;
         if (currentHp <= 0) {
@@ -118,6 +179,9 @@ public class Monster {
     }
 
 
+    /**
+     * Monster's image will be updated to its death animation when it is dying.
+     */
     public void updateDyingImage() {
         if (dying){
             switch(dyingCounter) {
@@ -146,16 +210,31 @@ public class Monster {
     }
 
 
+    /**
+     * Get whether the monster is dying.
+     * 
+     * @return monster dying status
+     */
     public boolean isDying() {
         return dying;
     }
 
 
+    /**
+     * Get whether the monster is dead. It will be removed when it is dead.
+     * 
+     * @return monster dead status
+     */
     public boolean isDead() {
         return dead;
     }
 
 
+    /**
+     * The spawn position of the monster will be determined based on the map layout.
+     * 
+     * It will extract all 'X' at the edge of the map, and select a random point to spawn.
+    */
     public void setSpawnPosition() {
 
         List<int[]> spawnPositions = new ArrayList<>();
@@ -190,6 +269,23 @@ public class Monster {
     }
 
 
+    /**
+     * Monster's path finding algorithm using BFS search.
+     * 
+     * All the point 'X' that can be reached by the monster will be found first, and stored in a queue.
+     * 
+     * These points have the attribute of the previous point pointFrom.
+     * 
+     * The path finding starts from the end point (wizard's house).
+     * 
+     * During the finding process, all points will be linked together.
+     * 
+     * These point will be updated with an attribute of pointNext.
+     * 
+     * The path stops when it reaches the start position, where it does not have a pointFrom.
+     * 
+     * Then the starting point of the monster will be set as currentPosition.
+     */
     public void findPath() {
 
         Queue<Point> queue = new LinkedList<>();
@@ -258,13 +354,24 @@ public class Monster {
     }
 
 
+    /**
+     * The monster moves with a given distance value.
+     * 
+     * @param distance distance to move each frame
+     */
     public void move(float distance) {
-        double limit = distance / 10;
+        double limit = distance / 20;
+
+        // if there is a next point, the monster will move towards it
         if (currentPosition.pointNext != null) {
+
+            // if the monster reaches the next point, set the current point as it
             if (firstMove || lastMove == 'n' || (Math.abs(x - currentPosition.pointNext.x) <= limit && Math.abs(y - currentPosition.pointNext.y) <= limit)) {
                 currentPosition = currentPosition.pointNext;
                 firstMove = false;
                 lastMove = ' ';
+
+            // the monster will move to the next point based on its relative position to the next
             } else if (Math.abs(x - currentPosition.pointNext.x) != 0 && Math.abs(y - currentPosition.pointNext.y) <= limit) {
                 if (x > currentPosition.pointNext.x) {
                     x -= distance;
@@ -297,6 +404,8 @@ public class Monster {
                         lastMove = 'd';
                     }
                 }
+
+            // if the monster is close enough to the next point, it will directly move to the next point
             } else {
                 if ((int) Math.abs(x - currentPosition.pointNext.x) == 0) {
                     x = currentPosition.pointNext.x;
@@ -308,16 +417,26 @@ public class Monster {
     }
 
 
+    /**
+     * Check whether the monster has reached the wizard house.
+     * 
+     * @return whether the monster has reached the wizard house
+     */
     public boolean hasReachedWizardHouse() {
         return (currentPosition.pointNext == null);
     }
 
 
+    /**
+     * The monster will be banished when it reaches the wizard house and respawn at the starting position.
+     */
     public void banishMonster() {
         x = xStart;
         y = yStart;
         currentPosition = startPosition;
     }
+
+
 
 }
 
@@ -340,6 +459,11 @@ class Point {
     }
 
 
+    /**
+     * The next point of the current point will be set.
+     * 
+     * @param point next point
+     */
     public void setNextPoint(Point point) {
         pointNext = point;
     }

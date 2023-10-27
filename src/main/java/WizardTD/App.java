@@ -13,6 +13,15 @@ import java.awt.image.BufferedImage;
 import java.io.*;
 import java.util.*;
 
+
+/**
+ * App class is the main class that contains all critical methods to build the game.
+ * 
+ * Methods in this class setup game, draw gameboard and detect user i/o from mouse and keyboard.
+ * 
+ * @author Junrui Kang
+ * @version 1.0.0
+ */
 public class App extends PApplet {
 
     public static final int CELLSIZE = 32;
@@ -29,7 +38,6 @@ public class App extends PApplet {
 
     public Random random = new Random();
 
-    // initialise the mapLayout content
     private char[][] mapLayout;
 
     // initialise all image resources for mapping
@@ -56,13 +64,11 @@ public class App extends PApplet {
     private boolean firstEndless = true;
 
 
+    /**
+     * Set up a configuration file path when the app is launched.
+     */
     public App() {
         this.configPath = "easy.json";
-
-        menuButtons = new HashMap<String, Button>();
-        menuButtons.put("easy", new Button("EASY GAME", "", 'e', 90, 360));
-        menuButtons.put("hard", new Button("HARD GAME", "", 'h', 300, 360));
-        menuButtons.put("endless", new Button("ENDLESS", "", 'x', 510, 360));
     }
 
     /**
@@ -76,6 +82,7 @@ public class App extends PApplet {
     /**
      * Load all resources such as images.
      * Initialise the elements such as the player, enemies and map elements.
+     * Instantiate game interface.
      */
 	@Override
     public void setup() {
@@ -84,6 +91,7 @@ public class App extends PApplet {
         frameRate(FPS);
 
         if (firstRun) {
+
             mapElement = new HashMap<String , PImage>();
 
             buttonElement = new HashMap<String, Button>();
@@ -92,6 +100,11 @@ public class App extends PApplet {
             monsterDeathElement = new HashMap<String, List<PImage>>();
 
             towerElement = new HashMap<Integer, PImage>();
+
+            menuButtons = new HashMap<String, Button>();
+            menuButtons.put("easy", new Button("EASY GAME", "", 'e', 90, 360));
+            menuButtons.put("hard", new Button("HARD GAME", "", 'h', 300, 360));
+            menuButtons.put("endless", new Button("ENDLESS", "", 'x', 510, 360));
 
             // load images
             mapElement.put("GRASS", loadImage("src/main/resources/WizardTD/grass.png"));
@@ -187,11 +200,11 @@ public class App extends PApplet {
                         PImage image = monster.getImage();
                         List<PImage> deathAnimation = monster.getDeathAnimation();
                         int hp = (int)(monster.getFullHp() * 1.2);
-                        double speed = (random.nextInt(7) + 1) * 0.5;
-                        double armour = (random.nextInt(9) + 1) / 10.0;
+                        double speed = monster.getSpeed();
+                        double armour = (random.nextInt(5) + 1) / 10.0;
                         int manaGainedOnKill = monster.getManaGainedOnKill() + 10;
 
-                        int quantity = wave.getMonsterDict().get(monster) + 3;
+                        int quantity = wave.getMonsterDict().get(monster) + random.nextInt(9);
 
                         newMonsterDict.put(new Monster(type, image, deathAnimation, hp, speed, armour, manaGainedOnKill, mapLayout), quantity);    
                     }
@@ -337,6 +350,9 @@ public class App extends PApplet {
     public void keyReleased(){
     }
 
+    /**
+     * Receive mouse pressed signal from the mouse.
+     */
     @Override
     public void mousePressed(MouseEvent e) {
 
@@ -369,15 +385,13 @@ public class App extends PApplet {
     }
 
 
+    /**
+     * Receive mouse released signal from the mouse.
+     */
     @Override
     public void mouseReleased(MouseEvent e) {
     }
 
-    /**
-     * @Override
-     * public void mouseDragged(MouseEvent e) {
-     * }
-     */
 
     /**
      * Draw all elements in the game by current frame.
@@ -392,15 +406,15 @@ public class App extends PApplet {
         } else {
 
             gameInterface.drawMap();
-            gameInterface.drawTowerGameField();
+            gameInterface.drawTowerBullet();
             gameInterface.drawBackground();
 
             gameInterface.drawTimer();
             gameInterface.drawMana();
             gameInterface.drawMenu();
+            gameInterface.drawTowerUpgradeInfo();
 
             gameInterface.drawMonster();
-            gameInterface.drawTowerInfo();
             gameInterface.drawWizardHouse();
 
             if (gameInterface.isGameWin() && !endless) {

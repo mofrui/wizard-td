@@ -14,41 +14,135 @@ import java.io.*;
 import java.util.*;
 
 
+
+/**
+ * GameInterface class handles the interactions between different components of the game.
+ * 
+ * It is a collection of draw methods, as well as handling object interactions.
+ * 
+ * @author Junrui Kang
+ * @version 1.0.0
+ */
 public class GameInterface {
 
+    /**
+     * Frame rate of the game.
+     */
 	private final int frameRate = 60;
 
+    /**
+     * PApplet object of the main app.java class.
+     */
 	private PApplet app;
+
+    /**
+     * A boolean indicating the gamemode is endless or not.
+     */
     private boolean endless;
 
+    /**
+     * A collection of buttons in the menu pages.
+     */
     private HashMap<String,Button> menuButtons;
 
+    /**
+     * A 2d array of map layout extracted from the configuration file.
+     */
 	private char[][] mapLayout;
+
+    /**
+     * A collection of map image elements loaded during the setip.
+     */
 	private HashMap<String,PImage> mapElement;
+
+    /**
+     * The coordinate of wizard house that will be drawn separately.
+     */
     private int wizard_house_x = 0, wizard_house_y = 0;
 
+    /**
+     * A list of waves that will be executed one by one.
+     */
 	private List<Wave> wavesList;
+
+    /**
+     * The current wave that the game is using.
+     */
 	private Wave currentWave;
+
+    /**
+     * The next wave that the game will be using.
+     */
     private Wave nextWave;
+
+    /**
+     * The current wave number displayed in the information bar.
+     */
     private int currentWaveNumber;
+
+    /**
+     * The total number of waves.
+     */
     private int totalWaveNumber;
 
+    /**
+     * Mana object.
+     */
     private Mana mana; 
 
+    /**
+     * A collection of buttons in the gameboard interface.
+     */
 	private HashMap<String, Button> buttonElement;
 
+    /**
+     * A list of monsters that are currently alive in the gameboard.
+     */
     private List<Monster> currentMonsterList;
 
+    /**
+     * A list of towers that are currently built in the gameboard.
+     */
     private List<Tower> currentTowerList;
+
+    /**
+     * A collection of tower images in the gameboard interface.
+     */
     private HashMap<Integer, PImage> towerElement;
+
+    /**
+     * Initial tower range extracted from the configuration file.
+     */
     private int initialTowerRange;
+
+    /**
+     * Initial tower firing speed extracted from the configuration file.
+     */
     private double initialTowerFiringSpeed;
+
+    /**
+     * Initial tower damage extracted from the configuration file.
+     */
     private int initialTowerDamage;
+
+    /**
+     * Initial tower cost extracted from the configuration file.
+     */
     private int towerCost;
 
+    /**
+     * Image of the bullet fired from the tower.
+     */
     private PImage bulletImage;
 
-    private boolean gameLost;
+    /**
+     * A boolean that indicates if the game is lost.
+     */
+    private boolean gameLost = false;
+
+    /**
+     * A boolean that indicates if the game is ready for the next round in the endless mode.
+     */
     private boolean readyForNextRound = false;
 
 
@@ -98,17 +192,32 @@ public class GameInterface {
         this.towerCost = towerCost;
 
         this.bulletImage = bulletImage;
-
-        this.gameLost = false;
 	}
 
 
-    // this method help to check whether the mouse is on a specific area or not
+    /**
+     * Check whether rmouse position is in a specific area or not
+     * 
+     * @param x The x-position of the target area.
+     * @param y The y-position of the target area.
+     * @param width The width of the target area.
+     * @param height The height of the target area.
+     * 
+     * @return A boolean that whether the mouse is in the area.
+     */
     public boolean checkMousePosition(int x, int y, int width, int height) {
-        return app.mouseX >= x && app.mouseX <= x + width && app.mouseY >= y && app.mouseY <= y + height;
+        return (
+            app.mouseX >= x &&
+            app.mouseX <= x + width &&
+            app.mouseY >= y &&
+            app.mouseY <= y + height
+        );
     }
 
 
+    /**
+     * Draw and handle the starting menu buttons of the game.
+     */
     public void drawStartMenu() {
 
         app.noStroke();
@@ -143,6 +252,9 @@ public class GameInterface {
     }
 
 
+    /**
+     * Draw the background of the status bar and menu bar in the game.
+     */
 	public void drawBackground() {
 		// the status background
         app.noStroke();
@@ -154,7 +266,9 @@ public class GameInterface {
         app.rect(640, 40, 680, 680);
 	}
 
-
+    /**
+     * Draw the gameboard map.
+     */
 	public void drawMap() {
 
         // y and x here correspond with the x and y coordinate
@@ -233,6 +347,9 @@ public class GameInterface {
 	}
 	
 
+    /**
+     * Draw and handle the countdown timer of the wave in the status bar.
+     */
 	public void drawTimer() {
 
 		// update the wave information
@@ -257,9 +374,13 @@ public class GameInterface {
 	                currentWave.setStarted(false);
 	            } else {
 	            	if (buttonElement.get("FF").isOn()) {
-	            		currentWave.updateRemainingTime(currentWave.getRemainingTime() - (2.0 / frameRate));
+	            		currentWave.updateRemainingTime(
+                            currentWave.getRemainingTime() - (2.0 / frameRate)
+                        );
 	            	} else {
-	            		currentWave.updateRemainingTime(currentWave.getRemainingTime() - (1.0 / frameRate));
+	            		currentWave.updateRemainingTime(
+                            currentWave.getRemainingTime() - (1.0 / frameRate)
+                        );
 	            	}
 	            }
 			} else if (nextWave != null) {
@@ -267,9 +388,13 @@ public class GameInterface {
 					nextWave.setStarted(true);
 				} else {
 					if (buttonElement.get("FF").isOn()) {
-	            		nextWave.updateRemainingPause(nextWave.getRemainingPause() - (2.0 / frameRate));
+	            		nextWave.updateRemainingPause(
+                            nextWave.getRemainingPause() - (2.0 / frameRate)
+                        );
 	            	} else {
-	            		nextWave.updateRemainingPause(nextWave.getRemainingPause() - (1.0 / frameRate));
+	            		nextWave.updateRemainingPause(
+                            nextWave.getRemainingPause() - (1.0 / frameRate)
+                        );
 	            	}
 				}
 			}
@@ -293,6 +418,9 @@ public class GameInterface {
     }
 
 
+    /**
+     * Draw and handle the mana information in the status bar.
+     */
     public void drawMana() {
 
         if (mana.getCurrentMana() < 0) {
@@ -332,6 +460,9 @@ public class GameInterface {
     }
 
 
+    /**
+     * Draw and handle the buttons in the gameboard.
+     */
     public void drawMenu() {
 
     	for (Map.Entry<String, Button> entry : buttonElement.entrySet()) {
@@ -362,15 +493,20 @@ public class GameInterface {
     }
 
 
+    /**
+     * Draw and handle the monsters in the gameboard.
+     */
     public void drawMonster() {
 
+        // spawn new monsters
         if (!buttonElement.get("P").isOn()) {
-            // if the time passed is a multiple of the spawn time interval, then spawn a new monster
+            // update the spawn interval
             if (buttonElement.get("FF").isOn()) {
                 currentWave.updateSpawnInterval(2.0 / frameRate);
             } else {
                 currentWave.updateSpawnInterval(1.0 / frameRate);
             }
+            // spawn a random monster
             if (currentWave.isReadyToSpawn()) {
                 if (currentWave.hasRemainingMonster()) {
                     Monster m = currentWave.getRandomMonster();
@@ -404,12 +540,13 @@ public class GameInterface {
                 app.noStroke();
                 app.rect(monster.getPosition()[0] - 5, monster.getPosition()[1] - 7, monster.getHpPercentage(), 3);
 
-
                 if (monster.isDying()) {
+                    // if the monster is dying, stop moving and draw death animation
                     if (!buttonElement.get("P").isOn()) {
                         monster.updateDyingImage();
                     }
                 } else {
+                    // move the monster
                     if (!buttonElement.get("P").isOn()) {
                         if (buttonElement.get("FF").isOn()) {
                             monster.move((float)(monster.getSpeed()/32));
@@ -418,10 +555,14 @@ public class GameInterface {
                     }
                 }
                 
+                // check whether the monster reaches the wizard house
+                // deduct mana and banish monster
                 if (monster.hasReachedWizardHouse()) {
                     mana.decreaseCurrentMana(monster.getCurrentHp());
                     monster.banishMonster();
                 }
+
+                // if the monster is dead, add that monster to the removal list
                 if (monster.isDead()) {
                     toRemove.add(monster);
                     mana.increaseCurrentMana(monster.getManaGainedOnKill());
@@ -429,13 +570,13 @@ public class GameInterface {
             }
         }
 
-        // remove monster
+        // remove dead monster
         for (Monster monsterToRemove : toRemove) {
             Iterator<Monster> iterator = currentMonsterList.iterator();
             while (iterator.hasNext()) {
                 Monster m = iterator.next();
                 if (m == monsterToRemove) {
-                    iterator.remove(); // Safely remove the monster
+                    iterator.remove();
                     break;
                 }
             }
@@ -443,7 +584,10 @@ public class GameInterface {
     }
 
 
-    public void drawTowerGameField() {
+    /**
+     * Draw and handle the towers and bullets in the gameboard.
+     */
+    public void drawTowerBullet() {
 
         if (currentTowerList.size() > 0) {
             for (Tower tower : currentTowerList) {
@@ -452,7 +596,7 @@ public class GameInterface {
                 tower.updateImage();
                 app.image(tower.getImage(), tower.getPosition()[0], tower.getPosition()[1]);
                 
-                // draw upgrade details
+                // draw upgrade images and features
                 if (tower.getUpgradeLevel('s') != 0) {
                     app.strokeWeight(tower.getUpgradeLevel('s') + 0.5f);
                     app.stroke(173, 216, 230);
@@ -465,7 +609,7 @@ public class GameInterface {
                     app.noFill();
                     app.stroke(218, 112, 214);
                     app.strokeWeight(2);
-                    app.ellipse(tower.getPosition()[0] + 6 + i * 10, tower.getPosition()[1] + 5, 5, 5);
+                    app.ellipse(tower.getPosition()[0] + 6 + i * 10,tower.getPosition()[1] + 5, 5, 5);
                     app.stroke(0, 0, 0);
                     app.strokeWeight(1);
                 }
@@ -475,12 +619,28 @@ public class GameInterface {
                     app.text("X", tower.getPosition()[0] + 3 + i * 10, tower.getPosition()[1] + 30);
                 }
 
-                // draw bullet
+                // draw tower range
+                if (tower.isOver(app.mouseX, app.mouseY)) {
+                    app.noFill();
+                    app.stroke(255, 255, 0);
+                    app.strokeWeight(2);
+                    app.ellipse(tower.getPosition()[0]+32/2, tower.getPosition()[1]+32/2, tower.getRange()*2, tower.getRange()*2);
+                    app.stroke(0, 0, 0);
+                    app.strokeWeight(1);
+                }
+
+                // attack monster
                 if (currentMonsterList.size() > 0) {
+
+                    // select a random monster to attack
                     Random random = new Random();
                     int randomIndex = random.nextInt(currentMonsterList.size());
                     Monster randomMonster = currentMonsterList.get(randomIndex);
+
+                    // get the distance between the monster and the tower
                     float distance = app.dist(tower.getPosition()[0], tower.getPosition()[1], randomMonster.getPosition()[0], randomMonster.getPosition()[1]);
+                    
+                    // update fire cooldown
                     if (!buttonElement.get("P").isOn()) {
                         if (buttonElement.get("FF").isOn()) {
                             tower.updateFireCoolDown(2.0 / frameRate);
@@ -488,6 +648,8 @@ public class GameInterface {
                             tower.updateFireCoolDown(1.0 / frameRate);
                         }
                     }
+
+                    // if the monster is in the range and cd is ready, attack the monster
                     if (distance < tower.getRange() && tower.isReadyToFire()) {
                         tower.fire(randomMonster);
                     }
@@ -495,13 +657,23 @@ public class GameInterface {
 
                 List<Bullet> toRemove = new ArrayList<>();
 
+                // draw bullet
                 if (tower.getBulletList().size() > 0) {
                     for (Bullet bullet : tower.getBulletList()) {
+
+                        // move the bullet
                         if (!buttonElement.get("P").isOn()) {
                             bullet.move(buttonElement.get("FF").isOn());
                         }
+
+                        // check whether the bullet can make damage
                         bullet.makeDamage();
+
+                        // check if the target monster is dead or lost
                         bullet.checkTargetLost();
+
+                        // if the bullet is still valid, draw the bullet
+                        // if the bullet loses its target, remove it from the gameboard
                         if (! bullet.isHide()) {
                             app.image(bullet.getImage(), bullet.getPosition()[0], bullet.getPosition()[1]);
                         } else {
@@ -510,37 +682,30 @@ public class GameInterface {
                     }
                 }
 
-                // remove monster
+                // remove bullet
                 for (Bullet bulletToRemove : toRemove) {
                     Iterator<Bullet> iterator = tower.getBulletList().iterator();
                     while (iterator.hasNext()) {
                         Bullet b = iterator.next();
                         if (b == bulletToRemove) {
-                            iterator.remove(); // Safely remove the monster
+                            iterator.remove();
                             break;
                         }
                     }
                 }
-
             }
         }
     }
 
 
-    public void drawTowerInfo() {
+    /**
+     * Draw and handle the tower upgrade information in the menu bar.
+     */
+    public void drawTowerUpgradeInfo() {
 
         if (currentTowerList.size() > 0) {
             for (Tower tower : currentTowerList) {
-                // draw tower info
-                if (tower.isOver(app.mouseX, app.mouseY)) {
-                    // draw range
-                    app.noFill();
-                    app.stroke(255, 255, 0);
-                    app.strokeWeight(2);
-                    app.ellipse(tower.getPosition()[0]+32/2, tower.getPosition()[1]+32/2, tower.getRange()*2, tower.getRange()*2);
-                    app.stroke(0, 0, 0);
-                    app.strokeWeight(1);
-                    
+                if (tower.isOver(app.mouseX, app.mouseY)) {   
                     // draw upgrade details
                     app.textSize(10);
                     app.fill(255, 255, 255);
@@ -570,11 +735,17 @@ public class GameInterface {
     }
 
 
+    /**
+     * Draw the wizard house.
+     */
     public void drawWizardHouse() {
         app.image(mapElement.get("WIZARD_HOUSE"), wizard_house_x, wizard_house_y - 8);
     }
 
 
+    /**
+     * Draw the game lost message bar.
+     */
     public void drawGameLost() {
         app.stroke(0, 0, 0);
         app.strokeWeight(3);
@@ -590,6 +761,9 @@ public class GameInterface {
     }
 
 
+    /**
+     * Draws the game win message bar.
+     */
     public void drawGameWin() {
         app.stroke(0, 0, 0);
         app.strokeWeight(3);
@@ -603,20 +777,45 @@ public class GameInterface {
     }
 
 
+    /**
+     * Check whether the game is won.
+     * 
+     * The game will win if:
+     * 1. it is the last wave
+     * 2. the wave is finish
+     * 3. no remaining monsters in the gameboard
+     * 4. no monster to be spawned in the current wave
+     * 
+     * @return A boolean that the game is won or not.
+     */
     public boolean isGameWin() {
-        return (nextWave == null && (int)currentWave.getRemainingTime() == 0 && currentMonsterList.size() == 0);
+        return (
+            currentWaveNumber + 1 == totalWaveNumber && 
+            (int)currentWave.getRemainingTime() == 0 && 
+            currentMonsterList.size() == 0 && 
+            !currentWave.hasRemainingMonster()
+        );
     }
 
 
+    /**
+     * Check whether the game is lost.
+     * 
+     * @return A boolean that the game is lost or not.
+     */
     public boolean isGameLost() {
         return gameLost;
     }
 
 
+    /**
+     * Build new tower in the gameboard.
+     */
     public void buildNewTower() {
 
         int cost = towerCost;
 
+        // update cost based on the upgrade selections
         if (buttonElement.get("U1").isOn()) {
             cost += 20;
         }
@@ -627,8 +826,10 @@ public class GameInterface {
             cost += 20;
         }
 
+        // build tower if the mana is enough and the mouse is in the gameboard
         if (mana.getCurrentMana() >= cost && (mapLayout[(int)(app.mouseY-40)/32][(int)app.mouseX/32] == ' ')) {
             
+            // check whether there has already exist a tower or not
             if (currentTowerList.size() > 0) {
                 for (Tower tower : currentTowerList) {
                     if (tower.isOver(app.mouseX, app.mouseY)) {
@@ -637,6 +838,7 @@ public class GameInterface {
                 }
             }
 
+            // build a new tower
             Tower tower = new Tower(app.mouseX, app.mouseY, initialTowerRange, initialTowerFiringSpeed, initialTowerDamage, towerElement, bulletImage);
             
             // upgrade tower
@@ -650,10 +852,12 @@ public class GameInterface {
                 tower.upgradeTower('d');
             }
 
+            // add the tower to the tower list
             currentTowerList.add(tower);
+
+            // deduct the mana
             mana.decreaseCurrentMana(towerCost);
         }
-
         buttonElement.get("T").setButtonStatus(false);
         buttonElement.get("U1").setButtonStatus(false);
         buttonElement.get("U2").setButtonStatus(false);
@@ -661,13 +865,20 @@ public class GameInterface {
     }
 
 
+    /**
+     * Handles the tower upgrades.
+     */
     public void upgradeTower() {
         
         if (currentTowerList.size() > 0) {
             for (Tower tower : currentTowerList) {
+
+                // check whether a tower is selected
                 if (tower.isOver(app.mouseX, app.mouseY)) {
+                    
                     int upgradeCost = 0;
 
+                    // update cost based on the upgrade selections
                     if (buttonElement.get("U1").isOn()) {
                         upgradeCost += tower.getUpgradeCost('r');
                     }
@@ -678,6 +889,7 @@ public class GameInterface {
                         upgradeCost += tower.getUpgradeCost('d');
                     }
 
+                    // upgrade tower if the mana is enough
                     if (mana.getCurrentMana() >= upgradeCost) {
                         if (buttonElement.get("U1").isOn()) {
                             tower.upgradeTower('r');
@@ -688,8 +900,12 @@ public class GameInterface {
                         if (buttonElement.get("U3").isOn()) {
                             tower.upgradeTower('d');
                         }
+
+                        // deduct the mana
                         mana.decreaseCurrentMana(upgradeCost);
                     } else {
+                        // the upgrade button will be switched off when mana is not enough
+                        buttonElement.get("T").setButtonStatus(false);
                         buttonElement.get("U1").setButtonStatus(false);
                         buttonElement.get("U2").setButtonStatus(false);
                         buttonElement.get("U3").setButtonStatus(false);
@@ -700,21 +916,39 @@ public class GameInterface {
     }
 
 
+    /**
+     * Check whether the game is ready for the next round in the endless mode.
+     * 
+     * @return A boolean that indicate the next round status.
+     */
     public boolean isReadyForNextRound() {
         return readyForNextRound;
     }
 
 
+    /**
+     * Updates the next round status.
+     */
     public void updateReadyForNextRound() {
         readyForNextRound = false;
     }
 
 
+    /**
+     * Get the current wave list for the endless mode to upgrade the wave.
+     * 
+     * @return Current wave list.
+     */
     public List<Wave> getWavesList() {
         return wavesList;
     }
 
 
+    /**
+     * Updates the game in the endless mode by making the next wave harder.
+     * 
+     * @param updatedWavesList the next five waves
+     */
     public void updateEndlessInformation(List<Wave> updatedWavesList) {
 
         wavesList = updatedWavesList;

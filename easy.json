@@ -2,62 +2,224 @@
   "layout": "level2.txt",
   "waves": [
     {
-      "duration": 8,
-      "pre_wave_pause": 0.5,
-	  "monsters": [
+      "duration": 5,
+      "pre_wave_pause": 5,
+	   "monsters": [
         {
           "type": "gremlin",
-          "hp": 100,
-          "speed": 2,
-          "armour": 0.5,
-          "mana_gained_on_kill": 15,
-          "quantity": 1
+          "hp": 50,
+          "speed": 1,
+          "armour": 0.9,
+          "mana_gained_on_kill": 10,
+          "quantity": 5
         }
 	  ]
     },
     {
       "duration": 5,
+      "pre_wave_pause": 8,
+      "monsters": [
+        {
+          "type": "gremlin",
+          "hp": 100,
+          "speed": 2,
+          "armour": 0.8,
+          "mana_gained_on_kill": 15,
+          "quantity": 10
+        }
+    ]
+    },
+    {
+      "duration": 10,
       "pre_wave_pause": 10,
       "monsters": [
         {
           "type": "gremlin",
-          "hp": 70,
+          "hp": 100,
           "speed": 2,
-          "armour": 0.7,
-          "mana_gained_on_kill": 30,
-          "quantity": 1
+          "armour": 0.8,
+          "mana_gained_on_kill": 20,
+          "quantity": 5
         },
         {
           "type": "beetle",
-          "hp": 50,
-          "speed": 4,
-          "armour": 0.8,
-          "mana_gained_on_kill": 30,
-          "quantity": 1
+          "hp": 200,
+          "speed": 1,
+          "armour": 0.7,
+          "mana_gained_on_kill": 20,
+          "quantity": 2
         },
         {
           "type": "worm",
-          "hp": 50,
-          "speed": 1,
-          "armour": 0.7,
-          "mana_gained_on_kill": 30,
-          "quantity": 1
+          "hp": 75,
+          "speed": 4,
+          "armour": 0.8,
+          "mana_gained_on_kill": 20,
+          "quantity": 10
         }
       ]
     },
     {
-      "duration": 5,
-      "pre_wave_pause": 10,
+      "duration": 15,
+      "pre_wave_pause": 15,
       "monsters": [
         {
           "type": "gremlin",
           "hp": 150,
-          "speed": 1.0,
+          "speed": 2,
           "armour": 0.7,
-          "mana_gained_on_kill": 20,
-          "quantity": 1
+          "mana_gained_on_kill": 30,
+          "quantity": 15
+        },
+        {
+          "type": "beetle",
+          "hp": 300,
+          "speed": 1,
+          "armour": 0.5,
+          "mana_gained_on_kill": 30,
+          "quantity": 5
+        },
+        {
+          "type": "worm",
+          "hp": 100,
+          "speed": 4,
+          "armour": 0.7,
+          "mana_gained_on_kill": 30,
+          "quantity": 20
         }
       ]
+    },
+    {
+      "duration": 20,
+      "pre_wave_pause": 10,
+      "monsters": [
+        {
+          "type": "beetle",
+          "hp": 2000,
+          "speed": 1,
+          "armour": 0.5,
+          "mana_gained_on_kill": 300,
+          "quantity": 2
+        }
+    ]
+    },
+    {
+      "duration": 20,
+      "pre_wave_pause": 20,
+      "monsters": [
+        {
+          "type": "gremlin",
+          "hp": 150,
+          "speed": 2,
+          "armour": 0.6,
+          "mana_gained_on_kill": 30,
+          "quantity": 15
+        },
+        {
+          "type": "beetle",
+          "hp": 300,
+          "speed": 1,
+          "armour": 0.5,
+          "mana_gained_on_kill": 30,
+          "quantity": 10
+        },
+        {
+          "type": "worm",
+          "hp": 125,
+          "speed": 4,
+          "armour": 0.7,
+          "mana_gained_on_kill": 30,
+          "quantity": 20
+        }
+      ]
+    },
+    {
+      "duration": 40,
+      "pre_wave_pause": 20,
+      "monsters": [
+        {
+          "type": "gremlin",
+          "hp": 200,
+          "speed": 2,
+          "armour": 0.5,
+          "mana_gained_on_kill": 30,
+          "quantity": 20
+        },
+        {
+          "type": "beetle",
+          "hp": 300,
+          "speed": 1,
+          "armour": 0.3,
+          "mana_gained_on_kill": 30,
+          "quantity": 10
+        },
+        {
+          "type": "worm",
+          "hp": 175,
+          "speed": 4,
+          "armour": 0.6,
+          "mana_gained_on_kill": 30,
+          "quantity": 30
+        }
+      ]
+    },
+    {
+      "duration": 50,
+      "pre_wave_pause": 30,
+      "monsters": [
+        {
+          "type": "gremlin",
+          "hp": 250,
+          "speed": 2.5,
+          "armour": 0.3,
+          "mana_gained_on_kill": 40,
+          "quantity": 25
+        },
+        {
+          "type": "beetle",
+          "hp": 500,
+          "speed": 1.5,
+          "armour": 0.2,
+          "mana_gained_on_kill": 40,
+          "quantity": 15
+        },
+        {
+          "type": "worm",
+          "hp": 200,
+          "speed": 4,
+          "armour": 0.5,
+          "mana_gained_on_kill": 40,
+          "quantity": 30
+        }
+      ]
+    },
+    {
+      "duration": 30,
+      "pre_wave_pause": 20,
+      "monsters": [
+        {
+          "type": "beetle",
+          "hp": 5000,
+          "speed": 1,
+          "armour": 0.1,
+          "mana_gained_on_kill": 300,
+          "quantity": 1
+        }
+    ]
+    },
+    {
+      "duration": 30,
+      "pre_wave_pause": 10,
+      "monsters": [
+        {
+          "type": "beetle",
+          "hp": 10000,
+          "speed": 1,
+          "armour": 0.05,
+          "mana_gained_on_kill": 500,
+          "quantity": 1
+        }
+    ]
     }
   ],
   "initial_tower_range": 96,
@@ -65,7 +227,7 @@
   "initial_tower_damage": 40,
   "initial_mana": 200,
   "initial_mana_cap": 1000,
-  "initial_mana_gained_per_second": 2,
+  "initial_mana_gained_per_second": 1,
   "tower_cost": 100,
   "mana_pool_spell_initial_cost": 100,
   "mana_pool_spell_cost_increase_per_use": 150,
